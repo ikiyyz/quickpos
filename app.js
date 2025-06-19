@@ -6,7 +6,6 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const flash = require("connect-flash");
 const { Pool } = require("pg");
-const suppliers = require('./routes/suppliers');
 
 const pool = new Pool({
   user: "riski",
