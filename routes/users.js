@@ -1,16 +1,20 @@
-var express = require('express');
+const express = require('express');
 const { checkLogin } = require('../helpers/utils');
-var router = express.Router();
+const router = express.Router();
+const { User } = require('../models');
 
 module.exports = function (db) {
-  router.get('/', checkLogin, async function (req, res, next) {
+  router.get('/', checkLogin, async (req, res) => {
     try {
-      const result = await db.query('SELECT userid, email, name, role FROM users ORDER BY userid');
+      const users = await User.findAll({
+        attributes: ['id', 'name', 'email', 'role'],
+        order: [['id', 'ASC']]
+      });
       res.render('users/index.ejs', {
         user: req.session.user,
         title: 'Users',
         currentPage: 'users',
-        users: result.rows
+        users: users
       });
     } catch (err) {
       req.flash('error', 'Error fetching users: ' + err.message);
@@ -18,19 +22,46 @@ module.exports = function (db) {
     }
   });
 
-  // Add route for displaying users data
-  router.get('/data', checkLogin, async function (req, res, next) {
+  router.get('/create', checkLogin, (req, res) => {
+    res.render('users/create.ejs', {
+      user: req.session.user,
+      title: 'Create User',
+      currentPage: 'users'
+    });
+  });
+
+  router.get('/:id/edit', checkLogin, async (req, res) => {
     try {
-      const result = await db.query('SELECT userid, email, name, role FROM users ORDER BY userid');
-      res.render('users/index.ejs', {
+      const user = await User.findByPk(req.params.id);
+      if (!user) {
+        req.flash('error', 'User not found');
+        return res.redirect('/users');
+      }
+      res.render('users/edit.ejs', {
         user: req.session.user,
-        title: 'Users Data',
+        title: 'Edit User',
         currentPage: 'users',
-        users: result.rows
+        userData: user
       });
     } catch (err) {
-      req.flash('error', 'Error fetching users data: ' + err.message);
-      res.redirect('/dashboard');
+      req.flash('error', 'Error fetching user: ' + err.message);
+      res.redirect('/users');
+    }
+  });
+
+  router.post('/:id/delete', checkLogin, async (req, res) => {
+    try {
+      const user = await User.findOne({ where: { id: req.params.id } });
+      if (!user) {
+        req.flash('error', 'User not found');
+        return res.redirect('/users');
+      }
+      await user.destroy();
+      req.flash('success', 'User has been deleted successfully');
+      res.redirect('/users');
+    } catch (err) {
+      req.flash('error', 'Error deleting user: ' + err.message);
+      res.redirect('/users');
     }
   });
 

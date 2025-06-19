@@ -1,0 +1,26 @@
+{
+  "development": {
+    "username": "riski",
+    "password": "todopassword",
+    "database": "posdb",
+    "host": "localhost",
+    "port": 5432,
+    "dialect": "postgres"
+  },
+  "test": {
+    "username": "riski",
+    "password": "todopassword",
+    "database": "posdb_test",
+    "host": "localhost",
+    "port": 5432,
+    "dialect": "postgres"
+  },
+  "production": {
+    "username": "riski",
+    "password": "todopassword",
+    "database": "posdb_prod",
+    "host": "localhost",
+    "port": 5432,
+    "dialect": "postgres"
+  }
+}
