@@ -16,7 +16,7 @@ const pool = new Pool({
 });
 
 var indexRouter = require('./routes/index')(pool);
-var dashboardRouter = require('./routes/dashboards')(pool);
+var dashboardRouter = require('./routes/dashboard')(pool);
 var usersRouter = require('./routes/users')(pool);
 var goodUtilities = require('./routes/goods')(pool);
 var suppliersRouter = require('./routes/suppliers')(pool);

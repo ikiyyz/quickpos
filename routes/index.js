@@ -3,20 +3,30 @@ const { comparePassword } = require('../helpers/utils');
 var router = express.Router();
 
 module.exports = function (db) {
-  // Halaman Login
   router.get('/', function (req, res, next) {
     if (req.session.user) {
       return res.redirect('/dashboard');
     }
     const successMessage = req.flash('success');
     const errorMessage = req.flash('error');
-    res.render('login', {
+    res.render('auth/login', {
       successMessage: successMessage[0] || null,
       errorMessage: errorMessage[0] || null,
     });
   });
 
-  // Proses Login
+  router.get('/login', function (req, res, next) {
+    if (req.session.user) {
+      return res.redirect('/dashboard');
+    }
+    const successMessage = req.flash('success');
+    const errorMessage = req.flash('error');
+    res.render('auth/login', {
+      successMessage: successMessage[0] || null,
+      errorMessage: errorMessage[0] || null,
+    });
+  });
+
   router.post('/login', async function (req, res, next) {
     const { email, password } = req.body;
     try {
@@ -24,7 +34,7 @@ module.exports = function (db) {
 
       if (result.rows.length === 0) {
         req.flash('error', 'Email is not registered');
-        return res.redirect('/');
+        return res.redirect('/login');
       }
 
       const user = result.rows[0];
@@ -32,7 +42,7 @@ module.exports = function (db) {
 
       if (!match) {
         req.flash('error', 'Password is wrong');
-        return res.redirect('/');
+        return res.redirect('/login');
       }
 
       req.session.user = {
@@ -45,7 +55,7 @@ module.exports = function (db) {
       return res.redirect('/dashboard');
     } catch (err) {
       req.flash('error', 'Login error: ' + err.message);
-      return res.redirect('/');
+      return res.redirect('/login');
     }
   });
 

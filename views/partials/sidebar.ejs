@@ -1,6 +1,4 @@
-<!-- Sidebar -->
 <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
-    <!-- Sidebar - Brand -->
     <a class="sidebar-brand d-flex align-items-center justify-content-center" href="/dashboard">
         <div class="sidebar-brand-icon rotate-n-15">
             <i class="fas fa-store"></i>
@@ -8,10 +6,8 @@
         <div class="sidebar-brand-text mx-3">POS</div>
     </a>
 
-    <!-- Divider -->
     <hr class="sidebar-divider my-0">
 
-    <!-- Nav Item - Dashboard -->
     <li class="nav-item <%= currentPage === 'dashboard' ? 'active' : '' %>">
         <a class="nav-link" href="/dashboard">
             <i class="fas fa-fw fa-tachometer-alt"></i>
@@ -19,15 +15,10 @@
         </a>
     </li>
 
-    <!-- Divider -->
     <hr class="sidebar-divider">
 
-    <!-- Heading -->
-    <div class="sidebar-heading">
-        MASTER
-    </div>
+    <div class="sidebar-heading">MASTER</div>
 
-    <!-- Nav Item - Goods Utilities -->
     <li class="nav-item <%= currentPage === 'goods-utilities' ? 'active' : '' %>">
         <a class="nav-link" href="/goods-utilities">
             <i class="fas fa-fw fa-wrench"></i>
@@ -35,7 +26,6 @@
         </a>
     </li>
 
-    <!-- Nav Item - Suppliers -->
     <li class="nav-item <%= currentPage === 'suppliers' ? 'active' : '' %>">
         <a class="nav-link" href="/suppliers">
             <i class="fas fa-fw fa-truck"></i>
@@ -43,7 +33,6 @@
         </a>
     </li>
 
-    <!-- Nav Item - Customers -->
     <li class="nav-item <%= currentPage === 'customers' ? 'active' : '' %>">
         <a class="nav-link" href="/customers">
             <i class="fas fa-fw fa-users"></i>
@@ -51,7 +40,6 @@
         </a>
     </li>
 
-    <!-- Nav Item - Users -->
     <li class="nav-item <%= currentPage === 'users' ? 'active' : '' %>">
         <a class="nav-link" href="/users">
             <i class="fas fa-fw fa-user"></i>
@@ -59,15 +47,10 @@
         </a>
     </li>
 
-    <!-- Divider -->
     <hr class="sidebar-divider">
 
-    <!-- Heading -->
-    <div class="sidebar-heading">
-        TRANSACTIONS
-    </div>
+    <div class="sidebar-heading">TRANSACTIONS</div>
 
-    <!-- Nav Item - Purchases -->
     <li class="nav-item <%= currentPage === 'purchases' ? 'active' : '' %>">
         <a class="nav-link" href="/purchases">
             <i class="fas fa-fw fa-shopping-cart"></i>
@@ -75,7 +58,6 @@
         </a>
     </li>
 
-    <!-- Nav Item - Sales -->
     <li class="nav-item <%= currentPage === 'sales' ? 'active' : '' %>">
         <a class="nav-link" href="/sales">
             <i class="fas fa-fw fa-chart-area"></i>
@@ -83,12 +65,9 @@
         </a>
     </li>
 
-    <!-- Divider -->
     <hr class="sidebar-divider d-none d-md-block">
 
-    <!-- Sidebar Toggler (Sidebar) -->
     <div class="text-center d-none d-md-inline">
         <button class="rounded-circle border-0" id="sidebarToggle"></button>
     </div>
 </ul>
-<!-- End of Sidebar -->
