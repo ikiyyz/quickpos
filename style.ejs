@@ -18,8 +18,7 @@
 
     <!-- Custom styles for this template-->
     <link href="/stylesheets/sb-admin-2.min.css" rel="stylesheet">
-
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body class="bg-gradient-primary">
@@ -37,6 +36,7 @@
                                     <div class="text-center">
                                         <h1 class="h4 text-gray-900 mb-4">Welcome Back!</h1>
                                     </div>
+
                                     <!-- FORM LOGIN -->
                                     <form class="user" method="POST" action="/login">
                                         <div class="form-group">
@@ -62,19 +62,40 @@
                                         </button>
                                     </form>
 
+                                    <% if (messages?.error?.length) { %>
+                                    <script>
+                                        document.addEventListener('DOMContentLoaded', function () {
+                                            Swal.fire({
+                                                icon: 'error',
+                                                title: 'Oops...',
+                                                text: '<%= messages.error[0] %>',
+                                                confirmButtonColor: '#e74a3b',
+                                                confirmButtonText: 'OK',
+                                                allowOutsideClick: true,
+                                                allowEscapeKey: true
+                                            });
+                                        });
+                                    </script>
+                                    <% } %>
+                                    <% if (messages?.success?.length) { %>
+                                    <script>
+                                        document.addEventListener('DOMContentLoaded', function () {
+                                            Swal.fire({
+                                                icon: 'success',
+                                                title: 'Berhasil!',
+                                                text: '<%= messages.success[0] %>',
+                                                confirmButtonColor: '#1cc88a',
+                                                confirmButtonText: 'OK',
+                                                allowOutsideClick: true,
+                                                allowEscapeKey: true
+                                            });
+                                        });
+                                    </script>
+                                    <% } %>
+
                                     <div class="text-center">
                                         <a class="small" href="/forgot-password">Forgot Password?</a>
                                     </div>
-                                    <% if (messages?.error?.length) { %>
-                                        <div class="alert alert-danger text-center mt-2" role="alert">
-                                            <%= messages.error[0] %>
-                                        </div>
-                                        <% } %>
-                                            <% if (messages?.success?.length) { %>
-                                                <div class="alert alert-success text-center mt-2" role="alert">
-                                                    <%= messages.success[0] %>
-                                                </div>
-                                                <% } %>
                                 </div>
                             </div>
                         </div>

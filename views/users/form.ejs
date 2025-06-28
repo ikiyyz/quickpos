@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>
+        <%= title %> - POS System
+    </title>
+
+    <link href="/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,300,400,700,900" rel="stylesheet">
+    <link href="/stylesheets/sb-admin-2.min.css" rel="stylesheet">
+</head>
+
+<body id="page-top">
+    <div id="wrapper">
+        <%- include('../partials/sidebar') %>
+
+            <div id="content-wrapper" class="d-flex flex-column">
+                <div id="content">
+                    <%- include('../partials/topbar') %>
+
+                        <div class="container-fluid">
+                            <!-- Page Heading -->
+                            <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                                <h1 class="h3 mb-0 text-gray-800">
+                                    <%= userData ? 'Edit User' : 'Add User' %>
+                                </h1>
+                            </div>
+
+                            <!-- Flash Messages -->
+                            <%- include('../partials/allert', { errorMessage: messages.error?.[0], successMessage:
+                                messages.success?.[0] }) %>
+
+                                <!-- User Form -->
+                                <form id="userForm" method="post"
+                                    action="<%= userData ? '/users/edit/' + userData.id : '/users/add' %>">
+                                    <div class="card shadow mb-4">
+                                        <div class="card-header py-3">
+                                            <strong class="text-primary">
+                                                <%= userData ? 'Form Edit' : 'Form Add' %>
+                                            </strong>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="form-group row">
+                                                <label for="email" class="col-sm-2 col-form-label">Email</label>
+                                                <div class="col-sm-10">
+                                                    <input type="email" class="form-control" id="email" name="email"
+                                                        value="<%= userData ? userData.email : '' %>" required>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group row">
+                                                <label for="name" class="col-sm-2 col-form-label">Name</label>
+                                                <div class="col-sm-10">
+                                                    <input type="text" class="form-control" id="name" name="name"
+                                                        value="<%= userData ? userData.name : '' %>" required>
+                                                </div>
+                                            </div>
+
+                                            <% if (!userData) { %>
+                                                <div class="form-group row">
+                                                    <label for="password"
+                                                        class="col-sm-2 col-form-label">Password</label>
+                                                    <div class="col-sm-10">
+                                                        <input type="password" class="form-control" id="password"
+                                                            name="password" required>
+                                                    </div>
+                                                </div>
+                                                <% } %>
+
+                                                    <div class="form-group row">
+                                                        <label class="col-sm-2 col-form-label">Role</label>
+                                                        <div class="col-sm-10">
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" name="role"
+                                                                    id="operator" value="operator" <%=userData &&
+                                                                    userData.role==='operator' ? 'checked' : '' %>
+                                                                required>
+                                                                <label class="form-check-label"
+                                                                    for="operator">Operator</label>
+                                                            </div>
+                                                            <div class="form-check">
+                                                                <input class="form-check-input" type="radio" name="role"
+                                                                    id="admin" value="admin" <%=userData &&
+                                                                    userData.role==='admin' ? 'checked' : '' %>
+                                                                required>
+                                                                <label class="form-check-label"
+                                                                    for="admin">Admin</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                        </div>
+
+                                        <div class="card-footer">
+                                            <button type="submit" class="btn btn-success btn-sm btn-icon-split"
+                                                id="saveBtn" disabled>
+                                                <span class="icon text-white-50"><i class="fas fa-save"></i></span>
+                                                <span class="text">Save</span>
+                                            </button>
+                                            <a href="/users" class="btn btn-warning btn-sm btn-icon-split">
+                                                <span class="icon text-white-50"><i class="fas fa-undo"></i></span>
+                                                <span class="text">Back</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </form>
+                        </div>
+                </div>
+
+                <%- include('../partials/footer') %>
+            </div>
+    </div>
+
+    <%- include('../partials/scripts') %>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const form = document.getElementById('userForm');
+                const saveBtn = document.getElementById('saveBtn');
+
+                const originalData = {
+                    email: form.email?.value || '',
+                    name: form.name?.value || '',
+                    role: document.querySelector('input[name="role"]:checked')?.value || ''
+                };
+
+                function checkChanges() {
+                    const currentData = {
+                        email: form.email?.value || '',
+                        name: form.name?.value || '',
+                        role: document.querySelector('input[name="role"]:checked')?.value || ''
+                    };
+
+                    const changed = Object.keys(originalData).some(
+                        key => originalData[key] !== currentData[key]
+                    );
+                    saveBtn.disabled = !changed;
+                }
+
+                form.addEventListener('input', checkChanges);
+                document.querySelectorAll('input[name="role"]').forEach(radio => {
+                    radio.addEventListener('change', checkChanges);
+                });
+
+                checkChanges(); // Initial state
+            });
+        </script>
+
+        <%- include('../partials/logout-modal') %>
+</body>
+
+</html>

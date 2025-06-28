@@ -1,0 +1,38 @@
+<% if (messages && messages.success && messages.success.length) { %>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      Toastify({
+        text: "<%= messages.success[0] %>",
+        duration: 3000,
+        gravity: "top",
+        position: "right",
+        backgroundColor: "#28a745",
+        close: true,
+        offset: { x: 10, y: window.innerWidth < 600 ? 40 : 70 },
+        style: {
+          maxWidth: "90vw",
+          fontSize: "1rem"
+        }
+      }).showToast();
+    });
+  </script>
+  <% } %>
+    <% if (messages && messages.error && messages.error.length) { %>
+      <script>
+        document.addEventListener('DOMContentLoaded', function () {
+          Toastify({
+            text: "<%= messages.error[0] %>",
+            duration: 3000,
+            gravity: "top",
+            position: "right",
+            backgroundColor: "#dc3545",
+            close: true,
+            offset: { x: 10, y: window.innerWidth < 600 ? 40 : 70 },
+            style: {
+              maxWidth: "90vw",
+              fontSize: "1rem"
+            }
+          }).showToast();
+        });
+      </script>
+      <% } %>

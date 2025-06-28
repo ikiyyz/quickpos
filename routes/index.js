@@ -10,8 +10,10 @@ module.exports = function (db) {
     const successMessage = req.flash('success');
     const errorMessage = req.flash('error');
     res.render('auth/login', {
-      successMessage: successMessage[0] || null,
-      errorMessage: errorMessage[0] || null,
+      messages: {
+        error: errorMessage,
+        success: successMessage
+      }
     });
   });
 
@@ -22,8 +24,10 @@ module.exports = function (db) {
     const successMessage = req.flash('success');
     const errorMessage = req.flash('error');
     res.render('auth/login', {
-      successMessage: successMessage[0] || null,
-      errorMessage: errorMessage[0] || null,
+      messages: {
+        error: errorMessage,
+        success: successMessage
+      }
     });
   });
 
@@ -64,6 +68,8 @@ module.exports = function (db) {
       if (err) {
         return res.send('Error saat logout');
       }
+      res.clearCookie('connect.sid');
+      res.set('Cache-Control', 'no-store');
       res.redirect('/');
     });
   });
