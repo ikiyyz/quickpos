@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>
+        <%= title %> - POS System
+    </title>
+
+    <link href="/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,300,400,700,900" rel="stylesheet">
+    <link href="/stylesheets/sb-admin-2.min.css" rel="stylesheet">
+</head>
+
+<body id="page-top">
+    <div id="wrapper">
+        <%- include('../partials/sidebar') %>
+
+            <div id="content-wrapper" class="d-flex flex-column">
+                <div id="content">
+                    <%- include('../partials/topbar') %>
+
+                        <div class="container-fluid">
+                            <!-- Page Heading -->
+                            <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                                <h1 class="h3 mb-0 text-gray-800">
+                                    <%= unit ? 'Edit Unit' : 'Add Unit' %>
+                                </h1>
+                            </div>
+
+                            <!-- Flash Messages -->
+                            <%- include('../partials/allert', { errorMessage: messages.error?.[0], successMessage:
+                                messages.success?.[0] }) %>
+
+                                <!-- User Form -->
+                                <form id="unitForm" method="post"
+                                    action="<%= unit ? '/units/edit/' + unit.unit : '/units/add' %>">
+                                    <div class="card shadow mb-4">
+                                        <div class="card-header py-3">
+                                            <strong class="text-primary">
+                                                <%= unit ? 'Form Edit' : 'Form Add' %>
+                                            </strong>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="form-group row">
+                                                <label for="unit" class="col-sm-2 col-form-label">Unit</label>
+                                                <div class="col-sm-10">
+                                                    <input type="text" class="form-control" id="unit" name="unit"
+                                                        value="<%= unit ? unit.unit : '' %>" required>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group row">
+                                                <label for="name" class="col-sm-2 col-form-label">Name</label>
+                                                <div class="col-sm-10">
+                                                    <input type="text" class="form-control" id="name" name="name"
+                                                        value="<%= unit ? unit.name : '' %>" required>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group row">
+                                                <label for="note" class="col-sm-2 col-form-label">Note</label>
+                                                <div class="col-sm-10">
+                                                    <textarea class="form-control" id="note" name="note" rows="3"><%= unit ? unit.note : '' %></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="card-footer">
+                                            <button type="submit" class="btn btn-success btn-sm btn-icon-split"
+                                                id="saveBtn" disabled>
+                                                <span class="icon text-white-50"><i class="fas fa-save"></i></span>
+                                                <span class="text">Save</span>
+                                            </button>
+                                            <a href="/units" class="btn btn-warning btn-sm btn-icon-split">
+                                                <span class="icon text-white-50"><i class="fas fa-undo"></i></span>
+                                                <span class="text">Back</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </form>
+                        </div>
+                </div>
+
+                <%- include('../partials/footer') %>
+            </div>
+    </div>
+
+    <%- include('../partials/scripts') %>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const form = document.getElementById('unitForm');
+                const saveBtn = document.getElementById('saveBtn');
+
+                const originalData = {
+                    unit: form.unit?.value || '',
+                    name: form.name?.value || '',
+                    note: form.note?.value || ''
+                };
+
+                function checkChanges() {
+                    const currentData = {
+                        unit: form.unit?.value || '',
+                        name: form.name?.value || '',
+                        note: form.note?.value || ''
+                    };
+
+                    const changed = Object.keys(originalData).some(
+                        key => originalData[key] !== currentData[key]
+                    );
+                    saveBtn.disabled = !changed;
+                }
+
+                form.addEventListener('input', checkChanges);
+
+                checkChanges(); // Initial state
+            });
+        </script>
+
+        <%- include('../partials/logout-modal') %>
+</body>
+
+</html>

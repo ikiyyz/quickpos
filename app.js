@@ -19,6 +19,7 @@ var indexRouter = require('./routes/index')(pool);
 var dashboardRouter = require('./routes/dashboard')(pool);
 var usersRouter = require('./routes/users')(pool);
 var goodUtilities = require('./routes/goods')(pool);
+var units = require('./routes/units')(pool);
 var suppliersRouter = require('./routes/suppliers')(pool);
 var cunstomerRouter = require('./routes/customers')(pool);
 var purchasesRouter = require('./routes/purchases')(pool);
@@ -57,6 +58,7 @@ app.use('/', indexRouter);
 app.use('/dashboard', dashboardRouter);
 app.use('/users', usersRouter);
 app.use('/goods', goodUtilities);
+app.use('/units', units)
 app.use('/suppliers', suppliersRouter);
 app.use('/customers', cunstomerRouter);
 app.use('/purchases', purchasesRouter);
