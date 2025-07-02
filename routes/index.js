@@ -10,6 +10,7 @@ module.exports = function (db) {
     const successMessage = req.flash('success');
     const errorMessage = req.flash('error');
     res.render('auth/login', {
+        currentPath: req.path,
       messages: {
         error: errorMessage,
         success: successMessage
@@ -24,6 +25,7 @@ module.exports = function (db) {
     const successMessage = req.flash('success');
     const errorMessage = req.flash('error');
     res.render('auth/login', {
+        currentPath: req.path,
       messages: {
         error: errorMessage,
         success: successMessage

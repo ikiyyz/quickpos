@@ -72,13 +72,13 @@
                                                     <% if (units && units.length > 0) { %>
                                                         <% units.forEach(unit => { %>
                                                             <tr>
-                                                                <td>
+                                                                <td data-order="<%= unit.unit %>">
                                                                     <%= unit.unit %>
                                                                 </td>
-                                                                <td>
+                                                                <td data-order="<%= unit.name %>">
                                                                     <%= unit.name %>
                                                                 </td>
-                                                                <td>
+                                                                <td data-order="<%= unit.note || '' %>">
                                                                     <%= unit.note || '-' %>
                                                                 </td>
                                                                 <td>

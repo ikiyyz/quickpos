@@ -1,5 +1,6 @@
 var createError = require('http-errors');
 var express = require('express');
+const fileUpload = require('express-fileupload');
 const session = require("express-session");
 var path = require('path');
 var cookieParser = require('cookie-parser');
@@ -35,6 +36,8 @@ app.set('view engine', 'ejs');
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+app.use(fileUpload());
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -47,10 +50,12 @@ app.use(
 );
 
 app.use(flash());
+
 app.use((req, res, next) => {
   res.set('Cache-Control', 'no-store, no-cache, must-revalidate, private');
   res.set('Pragma', 'no-cache');
   res.set('Expires', '0');
+  res.locals.currentPath = req.path;
   next();
 });
 

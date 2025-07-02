@@ -8,7 +8,7 @@
 
     <hr class="sidebar-divider my-0">
 
-    <li class="nav-item <%= currentPage === 'dashboard' ? 'active' : '' %>">
+    <li class="nav-item <%= currentPath.startsWith('/dashboard') ? 'active' : '' %>">
         <a class="nav-link" href="/dashboard">
             <i class="fas fa-fw fa-tachometer-alt"></i>
             <span>Dashboard</span>
@@ -19,35 +19,39 @@
 
     <div class="sidebar-heading">MASTER</div>
 
-    <li class="nav-item">
-        <a class="nav-link collapsed" href="/goods-utilities" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
-            <i class="fas fa-fw fa-wrench"></i>
+    <li class="nav-item <%= currentPath.startsWith('/goods') || currentPath.startsWith('/units') ? 'active' : '' %>">
+        <a class="nav-link collapsed" href="#" data-toggle="collapse" data-target="#collapseGoods"
+            aria-expanded="<%= currentPath.startsWith('/goods') || currentPath.startsWith('/units') ? 'true' : 'false' %>"
+            aria-controls="collapseGoods">
+            <i class="fas fa-fw fa-boxes"></i>
             <span>Goods Utilities</span>
         </a>
-        <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionSidebar">
+        <div id="collapseGoods"
+            class="collapse<%= currentPath.startsWith('/goods') || currentPath.startsWith('/units') ? ' show' : '' %>"
+            data-parent="#accordionSidebar">
             <div class="bg-white py-2 collapse-inner rounded">
-                <h6 class="collapse-header">Goods Utilities:</h6>
-                <a class="collapse-item" href="/goods">Goods</a>
-                <a class="collapse-item" href="/units">Units</a>
+                <h6 class="collapse-header">Goods Components:</h6>
+                <a class="collapse-item <%= currentPath.startsWith('/goods') ? 'active' : '' %>" href="/goods">Goods</a>
+                <a class="collapse-item <%= currentPath.startsWith('/units') ? 'active' : '' %>" href="/units">Units</a>
             </div>
         </div>
     </li>
 
-    <li class="nav-item <%= currentPage === 'suppliers' ? 'active' : '' %>">
+    <li class="nav-item <%= currentPath.startsWith('/suppliers') ? 'active' : '' %>">
         <a class="nav-link" href="/suppliers">
             <i class="fas fa-fw fa-truck"></i>
             <span>Suppliers</span>
         </a>
     </li>
 
-    <li class="nav-item <%= currentPage === 'customers' ? 'active' : '' %>">
+    <li class="nav-item <%= currentPath.startsWith('/customers') ? 'active' : '' %>">
         <a class="nav-link" href="/customers">
             <i class="fas fa-fw fa-users"></i>
             <span>Customers</span>
         </a>
     </li>
 
-    <li class="nav-item <%= currentPage === 'users' ? 'active' : '' %>">
+    <li class="nav-item <%= currentPath.startsWith('/users') ? 'active' : '' %>">
         <a class="nav-link" href="/users">
             <i class="fas fa-fw fa-user"></i>
             <span>Users</span>
@@ -58,14 +62,14 @@
 
     <div class="sidebar-heading">TRANSACTIONS</div>
 
-    <li class="nav-item <%= currentPage === 'purchases' ? 'active' : '' %>">
+    <li class="nav-item <%= currentPath.startsWith('/purchases') ? 'active' : '' %>">
         <a class="nav-link" href="/purchases">
             <i class="fas fa-fw fa-shopping-cart"></i>
             <span>Purchases</span>
         </a>
     </li>
 
-    <li class="nav-item <%= currentPage === 'sales' ? 'active' : '' %>">
+    <li class="nav-item <%= currentPath.startsWith('/sales') ? 'active' : '' %>">
         <a class="nav-link" href="/sales">
             <i class="fas fa-fw fa-chart-area"></i>
             <span>Sales</span>

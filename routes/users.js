@@ -2,7 +2,6 @@ const express = require('express');
 const { checkLogin, generatePassword } = require('../helpers/utils');
 const router = express.Router();
 const { User } = require('../models');
-const { Op } = require('sequelize');
 
 module.exports = function (db) {
 
@@ -21,30 +20,8 @@ module.exports = function (db) {
 
   router.get('/', checkLogin, async (req, res) => {
     try {
-      const {
-        page = 1,
-        limit = 10,
-        search = '',
-        sortBy = 'id',
-        sortOrder = 'ASC'
-      } = req.query;
-
-      const offset = (+page - 1) * +limit;
-
-      const whereCondition = search ? {
-        [Op.or]: [
-          { name: { [Op.iLike]: `%${search}%` } },
-          { email: { [Op.iLike]: `%${search}%` } },
-          { role: { [Op.iLike]: `%${search}%` } }
-        ]
-      } : {};
-
-      const { count, rows: users } = await User.findAndCountAll({
-        where: whereCondition,
-        attributes: ['id', 'name', 'email', 'role', 'createdAt'],
-        order: [[sortBy, sortOrder]],
-        limit: +limit,
-        offset
+      const users = await User.findAll({
+        attributes: ['id', 'name', 'email', 'role', 'createdAt']
       });
 
       res.render('users/list.ejs', {
@@ -52,19 +29,6 @@ module.exports = function (db) {
         user: req.session.user,
         title: 'Users',
         users,
-        limit: +limit,
-        pagination: {
-          page: +page,
-          totalPages: Math.ceil(count / limit),
-          totalRecords: count,
-          hasNextPage: +page < Math.ceil(count / limit),
-          hasPrevPage: +page > 1,
-          nextPage: +page + 1,
-          prevPage: +page - 1
-        },
-        search,
-        sortBy,
-        sortOrder,
         messages: req.flash()
       });
     } catch (err) {

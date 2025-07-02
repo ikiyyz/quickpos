@@ -74,16 +74,16 @@
                                                     <% if (users && users.length> 0) { %>
                                                         <% users.forEach(user=> { %>
                                                             <tr>
-                                                                <td>
+                                                                <td data-order="<%= user.id %>">
                                                                     <%= user.id %>
                                                                 </td>
-                                                                <td>
+                                                                <td data-order="<%= user.name %>">
                                                                     <%= user.name %>
                                                                 </td>
-                                                                <td>
+                                                                <td data-order="<%= user.email %>">
                                                                     <%= user.email %>
                                                                 </td>
-                                                                <td>
+                                                                <td data-order="<%= user.role %>">
                                                                     <%= user.role %>
                                                                 </td>
                                                                 <td>

@@ -9,7 +9,7 @@ module.exports = function (db) {
       res.render('dashboard/index.ejs', {
         title: 'Dashboard',
         user: req.session.user,
-        currentPage: 'dashboard'
+        currentPath: req.path
       });
     } catch (err) {
       req.flash('error', 'Error accessing dashboard: ' + err.message);
