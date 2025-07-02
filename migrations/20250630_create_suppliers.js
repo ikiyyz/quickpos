@@ -20,6 +20,16 @@ module.exports = {
       phone: {
         type: DataTypes.STRING(20),
         allowNull: true
+      },
+      createdAt: {
+        allowNull: false,
+        type: DataTypes.DATE,
+        defaultValue: Sequelize.fn('NOW')
+      },
+      updatedAt: {
+        allowNull: false,
+        type: DataTypes.DATE,
+        defaultValue: Sequelize.fn('NOW')
       }
     });
   },

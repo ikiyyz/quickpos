@@ -15,6 +15,16 @@ module.exports = {
       note: {
         type: DataTypes.TEXT,
         allowNull: true
+      },
+      createdAt: {
+        allowNull: false,
+        type: DataTypes.DATE,
+        defaultValue: Sequelize.fn('NOW')
+      },
+      updatedAt: {
+        allowNull: false,
+        type: DataTypes.DATE,
+        defaultValue: Sequelize.fn('NOW')
       }
     });
   },
