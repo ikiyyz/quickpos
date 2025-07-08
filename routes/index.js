@@ -10,7 +10,7 @@ module.exports = function (db) {
     const successMessage = req.flash('success');
     const errorMessage = req.flash('error');
     res.render('auth/login', {
-        currentPath: req.path,
+      currentPath: req.path,
       messages: {
         error: errorMessage,
         success: successMessage
@@ -25,7 +25,7 @@ module.exports = function (db) {
     const successMessage = req.flash('success');
     const errorMessage = req.flash('error');
     res.render('auth/login', {
-        currentPath: req.path,
+      currentPath: req.path,
       messages: {
         error: errorMessage,
         success: successMessage
@@ -52,7 +52,7 @@ module.exports = function (db) {
       }
 
       req.session.user = {
-        userid: user.userid,
+        userid: user.id,
         email: user.email,
         name: user.name,
         role: user.role,
