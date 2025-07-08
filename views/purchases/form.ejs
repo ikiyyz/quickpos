@@ -174,11 +174,10 @@
             <%- include('../partials/logout-modal') %>
 
                 <script type="application/json" id="goods-data">
+
         <%- JSON.stringify(goods) %>
     </script>
-
                 <script>
-                    // Helper: Format currency ke Rupiah
                     function formatCurrency(amount) {
                         if (!amount && amount !== 0) return 'Rp 0,00';
                         const num = parseFloat(amount);
@@ -190,7 +189,6 @@
                         return `Rp ${formatted}`;
                     }
 
-                    // Helper: Tampilkan toast notification
                     function showToast(message, type = 'success') {
                         Toastify({
                             text: message,
@@ -201,7 +199,6 @@
                         }).showToast();
                     }
 
-                    // Helper: Hitung total harga per item
                     function calculateTotal() {
                         const price = parseFloat(purchasePriceInput.value);
                         const qty = parseFloat(quantityInput.value);
@@ -216,40 +213,43 @@
                         }
                     }
 
-                    // Helper: Render tabel item pembelian
                     function renderItems(items) {
                         const tbody = document.getElementById('itemsTbody');
                         tbody.innerHTML = '';
                         let sum = 0;
+
                         items.forEach((item, idx) => {
                             const tr = document.createElement('tr');
                             const total = item.purchaseprice * item.quantity;
                             sum += total;
+
+                            const itemIdentifier = isEditMode ? item.id : item.itemcode;
+
                             tr.innerHTML = `
-                            <td>${idx + 1}</td>
-                            <td>${item.itemcode}</td>
-                              <td>${item.Goods ? item.Goods.name : item.name || ''}</td>
-                            <td>${item.quantity}</td>
-                            <td>${formatCurrency(item.purchaseprice)}</td>
-                            <td>${formatCurrency(total)}</td>
-                            <td>
-                                <button type="button" class="btn btn-outline-danger btn-circle btn-sm shadow-sm" onclick="showDeleteItemModal('${item.id}')" title="Hapus Item">
-                                    <i class="fa fa-trash"></i>
-                                </button>
-                            </td>
-                        `;
+                                <td>${idx + 1}</td>
+                                <td>${item.itemcode}</td>
+                                <td>${item.Goods ? item.Goods.name : item.name || ''}</td>
+                                <td>${item.quantity}</td>
+                                <td>${formatCurrency(item.purchaseprice)}</td>
+                                <td>${formatCurrency(total)}</td>
+                                <td>
+                                    <button type="button" class="btn btn-outline-danger btn-circle btn-sm shadow-sm"
+                                        onclick="showDeleteItemModal('${itemIdentifier}')" title="Hapus Item">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </td>
+                            `;
                             tbody.appendChild(tr);
                         });
+
                         document.getElementById('totalsum').value = formatCurrency(sum);
                     }
 
-                    // Helper: Load item existing (edit mode)
                     function loadExistingItems() {
                         const existingItems = JSON.parse('<%- JSON.stringify(purchase?.Purchaseitems || []) %>');
                         renderItems(existingItems);
                     }
 
-                    // Helper: Fetch ulang item setelah update/hapus (edit mode)
                     function fetchUpdatedItems() {
                         fetch(`/purchases/edit/${invoice}`)
                             .then(res => res.text())
@@ -265,13 +265,12 @@
                             });
                     }
 
-                    // Helper: Tampilkan modal konfirmasi hapus item
                     function showDeleteItemModal(itemId) {
                         window.itemIdToDelete = itemId;
                         $('#deleteItemModal').modal('show');
                     }
 
-                    // --- Data & Inisialisasi ---
+                    // inisialisasi data & elemen
                     const goodsData = JSON.parse(document.getElementById('goods-data').textContent);
                     const barcodeSelect = document.getElementById('barcodeSelect');
                     const goodNameInput = document.getElementById('goodName');
@@ -282,20 +281,18 @@
                     const invoice = document.getElementById('invoice').value;
                     const isEditMode = document.getElementById('isEditMode').value === 'true';
 
-                    // Inisialisasi tempItems untuk mode add
                     if (!isEditMode) {
                         window.tempItems = [];
                     }
-                    // Load item existing jika edit mode
                     if (isEditMode) {
                         loadExistingItems();
                     }
 
-                    // --- Event Handler ---
-                    // Update harga & nama barang saat barcode berubah
+                    // Event Listener
                     barcodeSelect.addEventListener('change', function () {
                         const selectedBarcode = this.value;
                         const selectedGood = goodsData.find(g => g.barcode === selectedBarcode);
+
                         if (selectedGood) {
                             goodNameInput.value = selectedGood.name;
                             stockInput.value = selectedGood.stock;
@@ -307,42 +304,39 @@
                             purchasePriceInput.value = '';
                         }
                     });
-                    // Update total harga saat qty berubah
+
                     quantityInput.addEventListener('input', calculateTotal);
-                    // Prevent default submit form
                     document.getElementById('purchaseForm').addEventListener('submit', function (e) {
                         e.preventDefault();
                         submitPurchase();
                     });
-                    // Inisialisasi select barcode
+
+                    // trigger perubahan pertama
                     barcodeSelect.dispatchEvent(new Event('change'));
 
-                    // --- Handler Utama ---
-                    // Tambah item ke daftar pembelian
+                    // add item daftar
                     window.addItem = function () {
                         const itemcode = barcodeSelect.value;
                         const good = goodsData.find(g => g.barcode === itemcode);
                         const quantity = parseInt(quantityInput.value);
                         const purchaseprice = parseFloat(purchasePriceInput.value);
                         const totalprice = purchaseprice * quantity;
+
                         if (!itemcode || !good || isNaN(quantity) || isNaN(purchaseprice)) {
                             showToast('Silakan lengkapi data barang.', 'error');
                             return;
                         }
+
                         if (quantity < 1) {
                             showToast('Jumlah minimal 1.', 'error');
                             return;
                         }
+
                         if (isEditMode) {
                             fetch(`/purchases/edit/${invoice}/item`, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    itemcode,
-                                    quantity,
-                                    purchaseprice,
-                                    totalprice
-                                })
+                                body: JSON.stringify({ itemcode, quantity, purchaseprice, totalprice })
                             })
                                 .then(res => res.json())
                                 .then(data => {
@@ -358,17 +352,20 @@
                                     showToast('Gagal menambah item: ' + err.message, 'error');
                                 });
                         } else {
+                            // simpan array (add mode)
                             const newItem = {
                                 itemcode,
                                 name: good.name,
                                 quantity,
                                 purchaseprice
                             };
+
                             const existingIndex = window.tempItems.findIndex(item => item.itemcode === itemcode);
                             if (existingIndex !== -1) {
                                 showToast('Barang ini sudah ada dalam daftar.', 'error');
                                 return;
                             }
+
                             window.tempItems.push(newItem);
                             renderItems(window.tempItems);
                             quantityInput.value = '';
@@ -376,69 +373,70 @@
                         }
                     }
 
-                    // Handler: Klik tombol Delete pada modal konfirmasi
+                    // hapus item daftar
                     document.addEventListener('DOMContentLoaded', function () {
                         document.body.setAttribute('tabindex', '-1');
+
                         const confirmDeleteItemBtn = document.getElementById('confirmDeleteItemBtn');
                         if (confirmDeleteItemBtn) {
                             confirmDeleteItemBtn.onclick = function () {
-                                if (window.itemIdToDelete) {
-                                    if (isEditMode) {
-                                        fetch(`/purchases/delete/${window.itemIdToDelete}/item`, { method: 'POST' })
-                                            .then(res => res.json())
-                                            .then(data => {
-                                                if (data.error) {
-                                                    showToast(data.error, 'error');
-                                                } else {
-                                                    fetchUpdatedItems();
-                                                    showToast('Item dihapus dari daftar.', 'success');
-                                                }
-                                            })
-                                            .catch(err => {
-                                                showToast('Gagal menghapus item: ' + err.message, 'error');
-                                            });
-                                    } else {
-                                        const index = window.tempItems.findIndex(item => item.itemcode === window.itemIdToDelete);
-                                        if (index !== -1) {
-                                            window.tempItems.splice(index, 1);
-                                            renderItems(window.tempItems);
-                                            showToast('Item dihapus dari daftar.', 'success');
-                                        }
+                                if (!window.itemIdToDelete) return;
+
+                                if (isEditMode) {
+                                    fetch(`/purchases/delete/${window.itemIdToDelete}/item`, { method: 'POST' })
+                                        .then(res => res.json())
+                                        .then(data => {
+                                            if (data.error) {
+                                                showToast(data.error, 'error');
+                                            } else {
+                                                fetchUpdatedItems();
+                                                showToast('Item dihapus dari daftar.', 'success');
+                                            }
+                                        })
+                                        .catch(err => {
+                                            showToast('Gagal menghapus item: ' + err.message, 'error');
+                                        });
+                                } else {
+                                    // hapus item array
+                                    const index = window.tempItems.findIndex(item => item.itemcode === window.itemIdToDelete);
+                                    if (index !== -1) {
+                                        window.tempItems.splice(index, 1);
+                                        renderItems(window.tempItems);
+                                        showToast('Item dihapus dari daftar.', 'success');
                                     }
-                                    document.body.focus();
-                                    $('#deleteItemModal').modal('hide');
-                                    window.itemIdToDelete = null;
                                 }
+
+                                document.body.focus();
+                                $('#deleteItemModal').modal('hide');
+                                window.itemIdToDelete = null;
                             }
                         }
                     });
 
-                    // Handler: Submit form add/edit purchase
                     window.submitPurchase = function () {
                         const supplier = document.getElementById('supplierSelect').value;
                         const time = document.getElementById('time').value;
                         let totalsumRaw = document.getElementById('totalsum').value;
                         let totalsum = parseFloat(totalsumRaw.replace(/[^\d.]/g, ''));
                         if (isNaN(totalsum)) totalsum = 0;
+
                         if (!supplier) {
                             showToast('Silakan pilih supplier.', 'error');
                             return;
                         }
+
                         if (isEditMode) {
+                            // Update data purchase
                             fetch(`/purchases/edit/${invoice}`, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    time,
-                                    supplier,
-                                    totalsum
-                                })
+                                body: JSON.stringify({ time, supplier, totalsum })
                             })
                                 .then(res => res.json())
                                 .then(data => {
                                     if (data.error) {
                                         showToast(data.error, 'error');
-                                    } else if (data.success) {
+                                    } else {
                                         showToast('Purchase berhasil diupdate!', 'success');
                                         setTimeout(() => {
                                             window.location.href = '/purchases';
@@ -448,25 +446,24 @@
                                 .catch(err => {
                                     showToast('Gagal menyimpan purchase: ' + err.message, 'error');
                                 });
+
                         } else {
+                            // Submit data baru
                             if (window.tempItems.length === 0) {
                                 showToast('Transaksi harus memiliki minimal 1 item.', 'error');
                                 return;
                             }
+
                             fetch('/purchases/add', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                    supplier,
-                                    items: window.tempItems,
-                                    invoice
-                                })
+                                body: JSON.stringify({ supplier, items: window.tempItems, invoice })
                             })
                                 .then(res => res.json())
                                 .then(data => {
                                     if (data.error) {
                                         showToast(data.error, 'error');
-                                    } else if (data.success) {
+                                    } else {
                                         showToast('Purchase berhasil disimpan!', 'success');
                                         setTimeout(() => {
                                             window.location.href = '/purchases';
@@ -478,6 +475,7 @@
                                 });
                         }
                     }
+  
                 </script>
 </body>
 

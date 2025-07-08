@@ -331,3 +331,32 @@ module.exports = function (db) {
 
   return router;
 }
+
+const finishBtn = document.getElementById('finishBtn');
+                    const supplierSelect = document.getElementById('supplierSelect');
+                    const itemsTbody = document.getElementById('itemsTbody');
+                    const originalSupplier = supplierSelect.value;
+                    const originalItemCount = itemsTbody.rows.length;
+
+                    function checkFinishState() {
+                        if (itemsTbody.rows.length === 0) {
+                            finishBtn.disabled = true;
+                            return;
+                        }
+                        if (supplierSelect.value !== originalSupplier) {
+                            finishBtn.disabled = false;
+                            return;
+                        }
+
+                        if (itemsTbody.rows.length !== originalItemCount) {
+                            finishBtn.disabled = false;
+                            return;
+                        }
+                        // tidak ada perubahan, disable
+                        finishBtn.disabled = true;
+                    }
+
+                    supplierSelect.addEventListener('change', checkFinishState);
+                    const observer = new MutationObserver(checkFinishState);
+                    observer.observe(itemsTbody, { childList: true, subtree: true });
+                    checkFinishState(); 

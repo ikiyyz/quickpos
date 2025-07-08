@@ -2,16 +2,16 @@ const bcrypt = require("bcrypt");
 const saltRounds = 10;
 
 function generatePassword(password) {
-  return bcrypt.hashSync(password, saltRounds);
+    return bcrypt.hashSync(password, saltRounds);
 }
 
 function comparePassword(password, hash) {
-  return bcrypt.compareSync(password, hash);
+    return bcrypt.compareSync(password, hash);
 }
 
 const checkLogin = (req, res, next) => {
-  if (!req.session.user) return res.redirect("/");
-  next();
+    if (!req.session.user) return res.redirect("/");
+    next();
 };
 
 async function generateInvoice(sequelize) {
@@ -38,9 +38,9 @@ function formatCurrency(amount) {
 }
 
 module.exports = {
-  generatePassword,
-  comparePassword,
-  checkLogin,
-  generateInvoice,
+    generatePassword,
+    comparePassword,
+    checkLogin,
+    generateInvoice,
   formatCurrency,
 };

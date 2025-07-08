@@ -8,27 +8,27 @@ module.exports = {
      */
     await queryInterface.bulkInsert('suppliers', [
       {
-        name: 'PT Sukses Makmur',
+        name: 'Pak Budi',
         address: 'Jl. Sudirman No. 123, Jakarta Pusat',
         phone: '021-5550123'
       },
       {
-        name: 'CV Maju Bersama',
+        name: 'Pak Joko',
         address: 'Jl. Thamrin No. 45, Jakarta Selatan',
         phone: '021-5550456'
       },
       {
-        name: 'UD Berkah Jaya',
+        name: 'Pak Slamet',
         address: 'Jl. Gatot Subroto No. 67, Jakarta Barat',
         phone: '021-5550789'
       },
       {
-        name: 'PT Indah Sejahtera',
+        name: 'Pak Dedi',
         address: 'Jl. Hayam Wuruk No. 89, Jakarta Utara',
         phone: '021-5550321'
       },
       {
-        name: 'CV Makmur Abadi',
+        name: 'Pak Agus',
         address: 'Jl. Asia Afrika No. 12, Bandung',
         phone: '022-5550654'
       }
