@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <title>
+        <%= title %> - POS System
+    </title>
+    <link href="/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link
+        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
+        rel="stylesheet">
+    <link href="/stylesheets/sb-admin-2.min.css" rel="stylesheet">
+    <link href="/vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
+</head>
+
+<body id="page-top">
+    <div id="wrapper">
+        <%- include('../partials/sidebar.ejs') %>
+            <div id="content-wrapper" class="d-flex flex-column">
+                <div id="content">
+                    <%- include('../partials/topbar.ejs') %>
+                        <div class="container-fluid">
+                            <div class="d-sm-flex align-items-center justify-content-between mb-3">
+                                <h1 class="h3 mb-0 text-gray-800">Sales</h1>
+                            </div>
+                            <%- include('../partials/allert', { errorMessage: messages.error?.[0], successMessage:
+                                messages.success?.[0] }) %>
+                                <div class="card mb-4">
+                                    <div class="card-header d-flex">
+                                        <h1>Transaction</h1>
+                                    </div>
+                                    <form id="salesForm" method="post"
+                                        action="<%= sale && sale.invoice ? `/sales/edit/${sale.invoice}` : '/sales/add' %>">
+                                        <input type="hidden" id="isEditMode"
+                                            value="<%= (sale && sale.invoice && sale.Saleitems) ? 'true' : 'false' %>">
+                                        <script type="application/json" id="sales-items-data">
+                                <%- JSON.stringify(sale?.Saleitems || []) %>
+                            </script>
+                                        <div class="card-body">
+                                            <div class="form-row mb-5">
+                                                <div class="col-md-4">
+                                                    <label for="invoice">Invoice</label>
+                                                    <input type="text" class="form-control" id="invoice" name="invoice"
+                                                        value="<%= sale?.invoice || '' %>" readonly>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label for="time">Time</label>
+                                                    <input type="text" class="form-control" id="time" name="time"
+                                                        value="<%= currentDateTime %>" readonly>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label>Operator</label>
+                                                    <input type="text" class="form-control"
+                                                        value="<%= user && user.name ? user.name : '' %>" readonly>
+                                                </div>
+                                            </div>
+                                            <hr class="mb-5">
+                                            <div class="form-row align-items-end mb-4">
+                                                <div class="col-md-4">
+                                                    <label>Goods Barcode</label>
+                                                    <select class="form-control" id="barcodeSelect">
+                                                        <% goods.forEach(good=> { %>
+                                                            <option value="<%= good.barcode %>">
+                                                                <%= good.barcode %> - <%= good.name %>
+                                                            </option>
+                                                            <% }); %>
+                                                    </select>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label>Goods Name</label>
+                                                    <input type="text" id="goodName" class="form-control" readonly>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label>Stock</label>
+                                                    <input type="text" id="stock" class="form-control" readonly>
+                                                </div>
+                                            </div>
+                                            <div class="form-row align-items-end mb-3">
+                                                <div class="col-md-4">
+                                                    <label>Selling Price</label>
+                                                    <input type="text" id="sellingPrice" class="form-control" readonly>
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label>Qty</label>
+                                                    <input type="number" id="qty" class="form-control" min="1">
+                                                </div>
+                                                <div class="col-md-4">
+                                                    <label>Total Price</label>
+                                                    <input type="text" id="totalPrice" class="form-control" readonly>
+                                                </div>
+                                            </div>
+                                            <button type="button" id="addItemBtn" class="btn btn-icon-split btn-primary"
+                                                onclick="addItem()">
+                                                <span class="icon text-white-50">
+                                                    <i class="fa fa-plus"></i>
+                                                </span>
+                                                <span class="text">Add</span>
+                                            </button>
+                                        </div>
+                                        <div class="table-responsive">
+                                            <table class="table table-striped mt-3" id="itemsTable">
+                                                <thead>
+                                                    <tr>
+                                                        <th>No.</th>
+                                                        <th>Barcode</th>
+                                                        <th>Name</th>
+                                                        <th>Qty</th>
+                                                        <th>Price</th>
+                                                        <th>Total Price</th>
+                                                        <th>Action</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="itemsTbody">
+                                                    <!-- Items will be loaded here -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="card-footer">
+                                            <div class="row mb-3">
+                                                <label for="totalsum" class="col-sm-2 col-form-label">Total
+                                                    Summary</label>
+                                                <div class="col-sm-10">
+                                                    <input type="text" class="form-control" id="totalsum"
+                                                        name="totalsum"
+                                                        value="<%= formatCurrency(sale ? sale.totalsum : 0) %>"
+                                                        readonly>
+                                                </div>
+                                            </div>
+                                            <div class="row mb-3">
+                                                <label for="pay" class="col-sm-2 col-form-label">Pay</label>
+                                                <div class="col-sm-10">
+                                                    <input type="number" class="form-control" id="pay" name="pay"
+                                                        min="0"
+                                                        value="<%= sale && typeof sale.pay !== 'undefined' ? sale.pay : '0.00' %>">
+                                                </div>
+                                            </div>
+                                            <div class="row mb-3">
+                                                <label for="change" class="col-sm-2 col-form-label">Change</label>
+                                                <div class="col-sm-10">
+                                                    <input type="text" class="form-control" id="change" name="change"
+                                                        value="0.00" readonly>
+                                                    <div id="changeError"
+                                                        style="display:none; color:#dc3545; font-size:0.95em; margin-top:4px;">
+                                                        <i class="fa fa-exclamation-circle"></i> Pembayaran tidak cukup.
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row mb-3">
+                                                <label for="customerSelect"
+                                                    class="col-sm-2 col-form-label">Customer</label>
+                                                <div class="col-sm-10">
+                                                    <select class="form-control" id="customerSelect" name="customer">
+                                                        <% customers.forEach(customer=> { %>
+                                                            <option value="<%= customer.customerid %>"
+                                                                <%=sale?.customer==customer.customerid ? 'selected' : ''
+                                                                %>>
+                                                                <%= customer.name %>
+                                                            </option>
+                                                            <% }); %>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <button type="button" onclick="submitSale()"
+                                                class="btn btn-icon-split btn-success">
+                                                <span class="icon text-white-50">
+                                                    <i class="fa fa-check"></i>
+                                                </span>
+                                                <span class="text">Finish</span>
+                                            </button>
+                                            <a href="/sales" role="button" class="btn btn-icon-split btn-warning">
+                                                <span class="icon text-white-50">
+                                                    <i class="fa fa-arrow-left"></i>
+                                                </span>
+                                                <span class="text">Back</span>
+                                            </a>
+                                        </div>
+                                    </form>
+                                </div>
+                        </div>
+                </div>
+
+                <%- include('../partials/footer') %>
+
+            </div>
+    </div>
+    <%- include('../partials/scripts.ejs') %>
+
+        <%- include('../partials/delete-modal-confirmation-item') %>
+
+            <%- include('../partials/logout-modal') %>
+
+                <%- include('../partials/sales-validation') %>
+
+                    <script type="application/json" id="goods-data">
+
+        <%- JSON.stringify(goods) %>
+        
+    </script>
+                    <script>
+
+                        // ELEMENT INITIALIZATION
+                        const goodsData = JSON.parse(document.getElementById('goods-data').textContent);
+                        const barcodeSelect = document.getElementById('barcodeSelect');
+                        const goodNameInput = document.getElementById('goodName');
+                        const stockInput = document.getElementById('stock');
+                        const sellingPriceInput = document.getElementById('sellingPrice');
+                        const quantityInput = document.getElementById('qty');
+                        const totalPriceInput = document.getElementById('totalPrice');
+                        const invoice = document.getElementById('invoice').value;
+                        const isEditMode = document.getElementById('isEditMode').value === 'true';
+                        const payInput = document.getElementById('pay');
+                        const totalsumInput = document.getElementById('totalsum');
+                        const changeInput = document.getElementById('change');
+
+                        // DATA MANAGEMENT
+                        if (!isEditMode) window.tempItems = [];
+
+                        let originalPay = isEditMode ? parseFloat('<%= sale ? sale.pay : 0 %>') : parseCurrency(payInput.value);
+                        let originalChange = isEditMode ? parseFloat('<%= sale ? sale.change : 0 %>') : parseCurrency(changeInput.value);
+                        let userModifiedPay = false;
+                        window.payTouched = false;
+
+                        // RENDERING FUNCTIONS
+                        function renderItems(items) {
+                            const tbody = document.getElementById('itemsTbody');
+                            tbody.innerHTML = '';
+                            let sum = 0;
+
+                            items.forEach((item, idx) => {
+                                const tr = document.createElement('tr');
+                                const total = item.sellingprice * item.quantity;
+                                sum += total;
+                                const itemIdentifier = isEditMode ? item.id : item.itemcode;
+
+                                tr.innerHTML = `
+                                <td>${idx + 1}</td>
+                                <td>${item.itemcode}</td>
+                                <td>${item.Goods ? item.Goods.name : item.name || ''}</td>
+                                <td>${item.quantity}</td>
+                                <td>${SalesValidation.formatCurrency(item.sellingprice)}</td>
+                                <td>${SalesValidation.formatCurrency(total)}</td>
+                                <td>
+                                    <button type="button" class="btn btn-outline-danger btn-circle btn-sm shadow-sm"
+                                        onclick="showDeleteItemModal('${itemIdentifier}')" title="Hapus Item">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </td>
+                            `;
+                                tbody.appendChild(tr);
+                            });
+ 
+                            totalsumInput.value = SalesValidation.formatCurrency(sum);
+
+                            updateChange();
+                        }
+
+                        // PAYMENT CALCULATION
+                        function updateChange() {
+                            const pay = SalesValidation.parseCurrency(payInput.value);
+                            const totalsum = SalesValidation.parseCurrency(totalsumInput.value);
+                            const change = pay - totalsum;
+                            changeInput.value = SalesValidation.formatCurrency(change > 0 ? change : 0);
+
+                            const errorDiv = document.getElementById('changeError');
+                            if (window.payTouched && pay < totalsum) {
+                                errorDiv.style.display = '';
+                            } else {
+                                errorDiv.style.display = 'none';
+                            }
+                        }
+
+                        // Event listener input pay
+                        payInput.addEventListener('input', function () {
+                            window.payTouched = true;
+                            userModifiedPay = true; 
+                            updateChange();
+                        });
+
+                        // GOODS SELECTION & CALCULATION
+                        barcodeSelect.addEventListener('change', function () {
+                            const selectedBarcode = this.value;
+                            const selectedGood = goodsData.find(g => g.barcode === selectedBarcode);
+
+                            if (selectedGood) {
+                                goodNameInput.value = selectedGood.name;
+                                stockInput.value = selectedGood.stock;
+                                sellingPriceInput.value = selectedGood.sellingprice;
+                            } else {
+                                goodNameInput.value = '';
+                                stockInput.value = '';
+                                sellingPriceInput.value = '';
+                            }
+                            calculateTotal();
+                        });
+
+                        quantityInput.addEventListener('input', calculateTotal);
+
+                        function calculateTotal() {
+                            const price = parseFloat(sellingPriceInput.value);
+                            const qty = parseFloat(quantityInput.value);
+
+                            if (!isNaN(price) && !isNaN(qty)) {
+                                const total = price * qty;
+                                totalPriceInput.value = SalesValidation.formatCurrency(total);
+                            } else {
+                                totalPriceInput.value = '';
+                            }
+                        }
+
+                        // ITEM MANAGEMENT
+                        window.addItem = function () {
+                            const itemcode = barcodeSelect.value;
+                            const good = goodsData.find(g => g.barcode === itemcode);
+                            const quantity = parseInt(quantityInput.value);
+                            const sellingprice = parseFloat(sellingPriceInput.value);
+
+                            if (!SalesValidation.validateAddItem(itemcode, good, quantity, sellingprice, window.tempItems || [], isEditMode)) {
+                                return;
+                            }
+
+                            if (isEditMode) {
+                                fetch(`/sales/edit/${invoice}/item`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        itemcode,
+                                        quantity,
+                                        sellingprice,
+                                        totalprice: sellingprice * quantity
+                                    })
+                                })
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        if (data.error) {
+                                            showToast(data.error, 'error');
+                                        } else {
+                                            fetchUpdatedItems();
+                                            quantityInput.value = '';
+                                            totalPriceInput.value = '';
+                                        }
+                                    })
+                                    .catch(err => {
+                                        showToast('Gagal menambah item: ' + err.message, 'error');
+                                    });
+                            } else {
+                                const newItem = {
+                                    itemcode,
+                                    name: good.name,
+                                    quantity,
+                                    sellingprice
+                                };
+
+                                window.tempItems.push(newItem);
+                                renderItems(window.tempItems);
+                                quantityInput.value = '';
+                                totalPriceInput.value = '';
+                            }
+                        }
+
+                        // ITEM DELETION
+                        window.showDeleteItemModal = function (itemId) {
+                            window.itemIdToDelete = itemId;
+                            $('#deleteItemModal').modal('show');
+                        }
+
+                        document.addEventListener('DOMContentLoaded', function () {
+                            const confirmDeleteItemBtn = document.getElementById('confirmDeleteItemBtn');
+                            if (confirmDeleteItemBtn) {
+                                confirmDeleteItemBtn.onclick = function () {
+                                    if (!window.itemIdToDelete) return;
+
+                                    if (isEditMode) {
+                                        fetch(`/sales/delete/${window.itemIdToDelete}/item`, { method: 'POST' })
+                                            .then(res => res.json())
+                                            .then(data => {
+                                                if (data.error) {
+                                                    showToast(data.error, 'error');
+                                                } else {
+                                                    fetchUpdatedItems();
+                                                    SalesValidation.showToast('Item dihapus dari daftar.', 'success');
+                                                }
+                                            })
+                                            .catch(err => {
+                                                showToast('Gagal menghapus item: ' + err.message, 'error');
+                                            });
+                                    } else {
+                                        const index = window.tempItems.findIndex(item => item.itemcode === window.itemIdToDelete);
+                                        if (index !== -1) {
+                                            window.tempItems.splice(index, 1);
+                                            renderItems(window.tempItems);
+                                            SalesValidation.showToast('Item dihapus dari daftar.', 'success');
+                                        }
+                                    }
+
+                                    $('#deleteItemModal').modal('hide');
+                                    window.itemIdToDelete = null;
+                                }
+                            }
+                        });
+                        function fetchUpdatedItems() {
+                            fetch(`/sales/edit/${invoice}`)
+                                .then(res => res.text())
+                                .then(html => {
+                                    const parser = new DOMParser();
+                                    const doc = parser.parseFromString(html, 'text/html');
+                                    const updatedItems = JSON.parse(doc.getElementById('sales-items-data').textContent);
+                                    renderItems(updatedItems);
+
+                                    // kembalikan pay ke nilai awal, change otomatis terupdate
+                                    if (isEditMode) {
+                                        payInput.value = originalPay;
+                                    }
+                                })
+                                .catch(err => {
+                                    console.error('Error fetching updated items:', err);
+                                    location.reload();
+                                });
+                        }
+                        // INITIALIZATION
+                        if (isEditMode) {
+                            const existingItems = JSON.parse('<%- JSON.stringify(sale?.Saleitems || []) %>');
+                            renderItems(existingItems);
+                            payInput.value = originalPay;
+                            changeInput.value = formatCurrency(originalChange);
+                        } else {
+                            renderItems(window.tempItems);
+                        }
+
+                        barcodeSelect.dispatchEvent(new Event('change'));
+
+                        // FORM SUBMISSION
+                        window.submitSale = function () {
+                            const pay = SalesValidation.parseCurrency(payInput.value);
+                            const totalsum = SalesValidation.parseCurrency(totalsumInput.value);
+                            const change = pay - totalsum;
+                            const customer = document.getElementById('customerSelect').value;
+                            const time = document.getElementById('time').value;
+                            const invoiceVal = document.getElementById('invoice').value;
+
+                            if (!SalesValidation.validatePayment(pay, totalsum)) {
+                                payInput.focus();
+                                return;
+                            }
+
+                            if (isEditMode) {
+                                fetch(`/sales/edit/${invoiceVal}`, {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ time, customer, pay, change })
+                                })
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        if (data.error) {
+                                            showToast(data.error, 'error');
+                                        } else {
+                                            showToast('Sale berhasil diupdate!', 'success');
+                                            setTimeout(() => {
+                                                window.location.href = '/sales';
+                                            }, 1000);
+                                        }
+                                    })
+                                    .catch(err => {
+                                        showToast('Gagal menyimpan sale: ' + err.message, 'error');
+                                    });
+                            } else {
+                                // submit data baru
+                                if (!SalesValidation.validateMinItems(window.tempItems)) {
+                                    return;
+                                }
+
+                                fetch('/sales/add', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({
+                                        customer,
+                                        items: window.tempItems,
+                                        invoice: invoiceVal,
+                                        pay,
+                                        change
+                                    })
+                                })
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        if (data.error) {
+                                            showToast(data.error, 'error');
+                                        } else {
+                                            showToast('Sale berhasil disimpan!', 'success');
+                                            setTimeout(() => {
+                                                window.location.href = '/sales';
+                                            }, 1000);
+                                        }
+                                    })
+                                    .catch(err => {
+                                        showToast('Gagal menyimpan sale: ' + err.message, 'error');
+                                    });
+                            }
+                        }
+                    </script>
+</body>
+
+</html>

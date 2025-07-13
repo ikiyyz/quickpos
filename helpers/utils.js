@@ -24,6 +24,16 @@ async function generateInvoice(sequelize) {
   }
 }
 
+async function generateSalesInvoice(sequelize) {
+  try {
+    const [results] = await sequelize.query('SELECT sales_invoice() as invoice_number');
+    return results[0].invoice_number;
+  } catch (error) {
+    console.error('Error generating sales invoice number:', error);
+    throw new Error('Failed to generate sales invoice number');
+  }
+}
+
 function formatCurrency(amount) {
   if (!amount && amount !== 0) return 'Rp 0,00';
 
@@ -42,5 +52,6 @@ module.exports = {
     comparePassword,
     checkLogin,
     generateInvoice,
-  formatCurrency,
+    generateSalesInvoice,
+    formatCurrency,
 };

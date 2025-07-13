@@ -1,0 +1,245 @@
+<script>
+    // SALES VALIDATION FUNCTIONS
+    function formatCurrency(num) {
+        return (typeof num === 'number' ? num : parseFloat(num) || 0).toLocaleString('id-ID', {
+            style: 'currency',
+            currency: 'IDR'
+        });
+    }
+
+    function parseCurrency(str) {
+        if (!str) return 0;
+        return parseFloat(str.toString().replace(/[^0-9,-]/g, '').replace(/\./g, '').replace(',', '.')) || 0;
+    }
+
+    function showToast(message, type = 'success') {
+        Toastify({
+            text: message,
+            duration: 3000,
+            gravity: 'top',
+            position: 'right',
+            backgroundColor: type === 'success' ? '#28a745' : '#dc3545'
+        }).showToast();
+    }
+
+    // Validasi input barang
+    function validateItemInput(itemcode, good, quantity, sellingprice) {
+        if (!itemcode || !good || isNaN(quantity) || isNaN(sellingprice)) {
+            showToast('Silakan lengkapi data barang.', 'error');
+            return false;
+        }
+        if (quantity < 1) {
+            showToast('Jumlah minimal 1.', 'error');
+            return false;
+        }
+        return true;
+    }
+
+    // Validasi item duplikat
+    function validateDuplicateItem(itemcode, tempItems) {
+        const existingIndex = tempItems.findIndex(item => item.itemcode === itemcode);
+        if (existingIndex !== -1) {
+            showToast('Barang ini sudah ada dalam daftar.', 'error');
+            return false;
+        }
+        return true;
+    }
+
+    // Validasi pembayaran
+    function validatePayment(pay, totalsum) {
+        if (pay < totalsum) {
+            showToast('Pembayaran kurang dari total belanja!', 'error');
+            return false;
+        }
+        return true;
+    }
+
+    // Validasi item minimal
+    function validateMinItems(tempItems) {
+        if (tempItems.length === 0) {
+            showToast('Transaksi harus memiliki minimal 1 item.', 'error');
+            return false;
+        }
+        return true;
+    }
+
+    // Validasi input customer
+    function validateCustomer(customer) {
+        if (!customer) {
+            showToast('Silakan pilih customer.', 'error');
+            return false;
+        }
+        return true;
+    }
+
+    // Validasi invoice
+    function validateInvoice(invoice) {
+        if (!invoice) {
+            showToast('Invoice tidak valid.', 'error');
+            return false;
+        }
+        return true;
+    }
+
+    // Validasi stok (opsional - bisa digunakan jika diperlukan)
+    function validateStock(quantity, availableStock) {
+        if (quantity > availableStock) {
+            showToast(`Stok tidak mencukupi. Tersedia: ${availableStock}`, 'error');
+            return false;
+        }
+        return true;
+    }
+
+    // Validasi harga
+    function validatePrice(price) {
+        if (price <= 0) {
+            showToast('Harga harus lebih dari 0.', 'error');
+            return false;
+        }
+        return true;
+    }
+
+    // Validasi quantity
+    function validateQuantity(quantity) {
+        if (quantity <= 0) {
+            showToast('Quantity harus lebih dari 0.', 'error');
+            return false;
+        }
+        if (!Number.isInteger(quantity)) {
+            showToast('Quantity harus berupa angka bulat.', 'error');
+            return false;
+        }
+        return true;
+    }
+
+    // Validasi barcode
+    function validateBarcode(barcode) {
+        if (!barcode || barcode.trim() === '') {
+            showToast('Barcode tidak boleh kosong.', 'error');
+            return false;
+        }
+        return true;
+    }
+
+    // Validasi nama barang
+    function validateGoodName(name) {
+        if (!name || name.trim() === '') {
+            showToast('Nama barang tidak boleh kosong.', 'error');
+            return false;
+        }
+        return true;
+    }
+
+    // Validasi total transaksi
+    function validateTotalTransaction(total) {
+        if (total <= 0) {
+            showToast('Total transaksi harus lebih dari 0.', 'error');
+            return false;
+        }
+        return true;
+    }
+
+    // Validasi change (kembalian)
+    function validateChange(change) {
+        if (change < 0) {
+            showToast('Kembalian tidak boleh negatif.', 'error');
+            return false;
+        }
+        return true;
+    }
+
+    // Validasi waktu transaksi
+    function validateTransactionTime(time) {
+        if (!time) {
+            showToast('Waktu transaksi tidak valid.', 'error');
+            return false;
+        }
+        return true;
+    }
+
+    // Validasi lengkap untuk submit sale
+    function validateSaleSubmission(pay, totalsum, customer, invoice, tempItems, isEditMode) {
+        // Validasi pembayaran
+        if (!validatePayment(pay, totalsum)) {
+            return false;
+        }
+
+        // Validasi customer
+        if (!validateCustomer(customer)) {
+            return false;
+        }
+
+        // Validasi invoice
+        if (!validateInvoice(invoice)) {
+            return false;
+        }
+
+        // Validasi item minimal (hanya untuk mode add)
+        if (!isEditMode && !validateMinItems(tempItems)) {
+            return false;
+        }
+
+        // Validasi total transaksi
+        if (!validateTotalTransaction(totalsum)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    function validateAddItem(itemcode, good, quantity, sellingprice, tempItems, isEditMode) {
+        // Validasi barcode
+        if (!validateBarcode(itemcode)) {
+            return false;
+        }
+
+        // Validasi nama barang
+        if (!validateGoodName(good?.name)) {
+            return false;
+        }
+
+        // Validasi quantity
+        if (!validateQuantity(quantity)) {
+            return false;
+        }
+
+        // Validasi harga
+        if (!validatePrice(sellingprice)) {
+            return false;
+        }
+
+        // Validasi input barang
+        if (!validateItemInput(itemcode, good, quantity, sellingprice)) {
+            return false;
+        }
+
+        // Validasi duplikat (hanya untuk mode add)
+        if (!isEditMode && !validateDuplicateItem(itemcode, tempItems)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    window.SalesValidation = {
+        formatCurrency,
+        parseCurrency,
+        showToast,
+        validateItemInput,
+        validateDuplicateItem,
+        validatePayment,
+        validateMinItems,
+        validateCustomer,
+        validateInvoice,
+        validateStock,
+        validatePrice,
+        validateQuantity,
+        validateBarcode,
+        validateGoodName,
+        validateTotalTransaction,
+        validateChange,
+        validateTransactionTime,
+        validateSaleSubmission,
+        validateAddItem
+    };
+</script>
