@@ -76,7 +76,7 @@ module.exports = function (db) {
           }
         ]
       });
-      
+
       if (!good) {
         req.flash('error', 'Good not found');
         res.status(404).render('goods/form.ejs', {
@@ -119,12 +119,21 @@ module.exports = function (db) {
   router.post('/add', checkLogin, async (req, res) => {
     try {
       const { barcode, name, stock, purchaseprice, sellingprice, unit } = req.body;
-      
+
       // Handle file upload
       let picturePath = null;
       if (req.files && req.files.picture) {
         const picture = req.files.picture;
-        const fileExt = path.extname(picture.name);
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+        const allowedExts = ['.jpg', '.jpeg', '.png'];
+        const maxSize = 1 * 1024 * 1024; // 1MB
+        const fileExt = path.extname(picture.name).toLowerCase();
+
+        if (!allowedTypes.includes(picture.mimetype) || !allowedExts.includes(fileExt) || picture.size > maxSize) {
+          req.flash("error", "Invalid image file.");
+          return res.redirect("/goods/add");
+        }
+
         const fileName = `${barcode.trim()}_${Date.now()}${fileExt}`;
         const uploadPath = path.join(
           __dirname,
@@ -139,7 +148,6 @@ module.exports = function (db) {
           }
           console.log("File berhasil diupload ke:", uploadPath);
         });
-        
         picturePath = `/uploads/${fileName}`;
       }
 
@@ -152,7 +160,7 @@ module.exports = function (db) {
         unit,
         picture: picturePath || null
       });
-      
+
       req.flash('success', 'Good created successfully');
       res.redirect('/goods');
     } catch (error) {
@@ -172,7 +180,7 @@ module.exports = function (db) {
   router.post('/edit/:barcode', checkLogin, async (req, res) => {
     try {
       const { name, stock, purchaseprice, sellingprice, unit } = req.body;
-      
+
       const good = await Goods.findByPk(req.params.barcode);
       if (!good) {
         req.flash('error', 'Good not found');
@@ -191,7 +199,16 @@ module.exports = function (db) {
       let picturePath = good.picture;
       if (req.files && req.files.picture) {
         const picture = req.files.picture;
-        const fileExt = path.extname(picture.name);
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+        const allowedExts = ['.jpg', '.jpeg', '.png'];
+        const maxSize = 1 * 1024 * 1024; // 1MB
+        const fileExt = path.extname(picture.name).toLowerCase();
+
+        if (!allowedTypes.includes(picture.mimetype) || !allowedExts.includes(fileExt) || picture.size > maxSize) {
+          req.flash("error", "Invalid image file.");
+          return res.redirect(`/goods/edit/${req.params.barcode}`);
+        }
+
         const fileName = `${req.params.barcode}_${Date.now()}${fileExt}`;
         const uploadPath = path.join(
           __dirname,
@@ -206,7 +223,6 @@ module.exports = function (db) {
           }
           console.log("File berhasil diupload ke:", uploadPath);
         });
-        
         picturePath = `/uploads/${fileName}`;
       }
 
@@ -218,7 +234,7 @@ module.exports = function (db) {
         unit,
         picture: picturePath
       });
-      
+
       req.flash('success', 'Good updated successfully');
       res.redirect('/goods');
     } catch (error) {
