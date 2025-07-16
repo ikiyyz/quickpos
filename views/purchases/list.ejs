@@ -18,66 +18,68 @@
         <div id="content-wrapper" class="d-flex flex-column">
             <div id="content">
                 <%- include('../partials/topbar') %>
-                <div class="container-fluid">
-                    <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                        <h1 class="h3 mb-0 text-gray-800">Purchases Management</h1>
-                    </div>
-                    <%- include('../partials/allert', { errorMessage: messages.error?.[0], successMessage: messages.success?.[0] }) %>
-                    <div class="card shadow mb-4">
-                        <div class="card-header py-3">
-                            <a href="/purchases/add" class="btn btn-primary btn-icon-split btn-sm shadow">
-                                <span class="icon text-white-50"><i class="fas fa-plus"></i></span>
-                                <span class="text">Add Purchase</span>
-                            </a>
+                <div id="main-content">
+                    <div class="container-fluid">
+                        <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                            <h1 class="h3 mb-0 text-gray-800">Purchases Management</h1>
                         </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
-                                    <thead>
-                                        <tr>
-                                            <th>Invoice</th>
-                                            <th>Time</th>
-                                            <th>Total Summary</th>
-                                            <th>Supplier</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tfoot>
-                                        <tr>
-                                            <th>Invoice</th>
-                                            <th>Time</th>
-                                            <th>Total Summary</th>
-                                            <th>Supplier</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </tfoot>
-                                    <tbody>
-                                        <% if (purchases && purchases.length > 0) { %>
-                                            <% purchases.forEach(purchase => { %>
-                                                <tr>
-                                                    <td data-order="<%= purchase.invoice %>">
-                                                        <a href="/purchases/edit/<%= purchase.invoice %>" title="Edit"><%= purchase.invoice %></a>
-                                                    </td>
-                                                    <td data-order="<%= purchase.time %>">
-                                                        <%= purchase.time ? moment(purchase.time).format('DD MMM YYYY HH:mm:ss') : '-' %>
-                                                    </td>
-                                                    <td data-order="<%= purchase.totalsum %>">
-                                                        <%= formatCurrency(purchase.totalsum) %>
-                                                    </td>
-                                                    <td data-order="<%= purchase.Supplier ? purchase.Supplier.name : '' %>">
-                                                        <%= purchase.Supplier ? purchase.Supplier.name : '-' %>
-                                                    </td>
-                                                    <td>
-                                                        <a href="/purchases/edit/<%= purchase.invoice %>" class="btn btn-outline-primary btn-circle btn-sm me-1 shadow-sm" title="Edit Purchase"><i class="fas fa-pen"></i></a>
-                                                        <button type="button" class="btn btn-outline-danger btn-circle btn-sm shadow-sm" title="Delete Purchase" data-toggle="modal" data-target="#deleteModal" data-id="<%= purchase.invoice %>" data-name="<%= purchase.invoice %>"><i class="fas fa-trash-alt"></i></button>
-                                                    </td>
-                                                </tr>
-                                            <% }) %>
-                                        <% } else { %>
-                                            <tr><td colspan="5" class="text-center">No purchases found</td></tr>
-                                        <% } %>
-                                    </tbody>
-                                </table>
+                        <%- include('../partials/allert', { errorMessage: messages.error?.[0], successMessage: messages.success?.[0] }) %>
+                        <div class="card shadow mb-4">
+                            <div class="card-header py-3">
+                                <a href="/purchases/add" class="btn btn-primary btn-icon-split btn-sm shadow">
+                                    <span class="icon text-white-50"><i class="fas fa-plus"></i></span>
+                                    <span class="text">Add Purchase</span>
+                                </a>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                        <thead>
+                                            <tr>
+                                                <th>Invoice</th>
+                                                <th>Time</th>
+                                                <th>Total Summary</th>
+                                                <th>Supplier</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tfoot>
+                                            <tr>
+                                                <th>Invoice</th>
+                                                <th>Time</th>
+                                                <th>Total Summary</th>
+                                                <th>Supplier</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </tfoot>
+                                        <tbody>
+                                            <% if (purchases && purchases.length > 0) { %>
+                                                <% purchases.forEach(purchase => { %>
+                                                    <tr>
+                                                        <td data-order="<%= purchase.invoice %>">
+                                                            <a href="/purchases/edit/<%= purchase.invoice %>" title="Edit"><%= purchase.invoice %></a>
+                                                        </td>
+                                                        <td data-order="<%= purchase.time %>">
+                                                            <%= purchase.time ? moment(purchase.time).format('DD MMM YYYY HH:mm:ss') : '-' %>
+                                                        </td>
+                                                        <td data-order="<%= purchase.totalsum %>">
+                                                            <%= formatCurrency(purchase.totalsum) %>
+                                                        </td>
+                                                        <td data-order="<%= purchase.Supplier ? purchase.Supplier.name : '' %>">
+                                                            <%= purchase.Supplier ? purchase.Supplier.name : '-' %>
+                                                        </td>
+                                                        <td>
+                                                            <a href="/purchases/edit/<%= purchase.invoice %>" class="btn btn-outline-primary btn-circle btn-sm me-1 shadow-sm" title="Edit Purchase"><i class="fas fa-pen"></i></a>
+                                                            <button type="button" class="btn btn-outline-danger btn-circle btn-sm shadow-sm" title="Delete Purchase" data-toggle="modal" data-target="#deleteModal" data-id="<%= purchase.invoice %>" data-name="<%= purchase.invoice %>"><i class="fas fa-trash-alt"></i></button>
+                                                        </td>
+                                                    </tr>
+                                                <% }) %>
+                                            <% } else { %>
+                                                <tr><td colspan="5" class="text-center">No purchases found</td></tr>
+                                            <% } %>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>

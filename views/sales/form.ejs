@@ -24,21 +24,22 @@
             <div id="content-wrapper" class="d-flex flex-column">
                 <div id="content">
                     <%- include('../partials/topbar.ejs') %>
-                        <div class="container-fluid">
-                            <div class="d-sm-flex align-items-center justify-content-between mb-3">
-                                <h1 class="h3 mb-0 text-gray-800">Sales</h1>
-                            </div>
-                            <%- include('../partials/allert', { errorMessage: messages.error?.[0], successMessage:
-                                messages.success?.[0] }) %>
-                                <div class="card mb-4">
-                                    <div class="card-header d-flex">
-                                        <h1>Transaction</h1>
-                                    </div>
-                                    <form id="salesForm" method="post"
-                                        action="<%= sale && sale.invoice ? `/sales/edit/${sale.invoice}` : '/sales/add' %>">
-                                        <input type="hidden" id="isEditMode"
-                                            value="<%= (sale && sale.invoice && sale.Saleitems) ? 'true' : 'false' %>">
-                                        <script type="application/json" id="sales-items-data">
+                        <div id="main-content">
+                            <div class="container-fluid">
+                                <div class="d-sm-flex align-items-center justify-content-between mb-3">
+                                    <h1 class="h3 mb-0 text-gray-800">Sales</h1>
+                                </div>
+                                <%- include('../partials/allert', { errorMessage: messages.error?.[0], successMessage:
+                                    messages.success?.[0] }) %>
+                                    <div class="card mb-4">
+                                        <div class="card-header d-flex">
+                                            <h1>Transaction</h1>
+                                        </div>
+                                        <form id="salesForm" method="post"
+                                            action="<%= sale && sale.invoice ? `/sales/edit/${sale.invoice}` : '/sales/add' %>">
+                                            <input type="hidden" id="isEditMode"
+                                                value="<%= (sale && sale.invoice && sale.Saleitems) ? 'true' : 'false' %>">
+                                            <script type="application/json" id="sales-items-data">
                                 <%- JSON.stringify(sale?.Saleitems || []) %>
                             </script>
                                         <div class="card-body">
@@ -154,7 +155,8 @@
                                                 <label for="customerSelect"
                                                     class="col-sm-2 col-form-label">Customer</label>
                                                 <div class="col-sm-10">
-                                                    <select class="form-control" id="customerSelect" name="customer">
+                                                    <select class="form-control" id="customerSelect" name="customer"
+                                                        <%=sale.change ? 'disabled' : '' %>>
                                                         <% customers.forEach(customer=> { %>
                                                             <option value="<%= customer.customerid %>"
                                                                 <%=sale?.customer==customer.customerid ? 'selected' : ''
@@ -253,7 +255,7 @@
                             `;
                                 tbody.appendChild(tr);
                             });
- 
+
                             totalsumInput.value = SalesValidation.formatCurrency(sum);
 
                             updateChange();
@@ -277,7 +279,7 @@
                         // Event listener input pay
                         payInput.addEventListener('input', function () {
                             window.payTouched = true;
-                            userModifiedPay = true; 
+                            userModifiedPay = true;
                             updateChange();
                         });
 

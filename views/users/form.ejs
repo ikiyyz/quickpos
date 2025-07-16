@@ -21,92 +21,94 @@
             <div id="content-wrapper" class="d-flex flex-column">
                 <div id="content">
                     <%- include('../partials/topbar') %>
+                        <div id="main-content">
+                            <div class="container-fluid">
+                                <!-- Page Heading -->
+                                <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                                    <h1 class="h3 mb-0 text-gray-800">
+                                        <%= userData ? 'Edit User' : 'Add User' %>
+                                    </h1>
+                                </div>
 
-                        <div class="container-fluid">
-                            <!-- Page Heading -->
-                            <div class="d-sm-flex align-items-center justify-content-between mb-4">
-                                <h1 class="h3 mb-0 text-gray-800">
-                                    <%= userData ? 'Edit User' : 'Add User' %>
-                                </h1>
-                            </div>
+                                <!-- Flash Messages -->
+                                <%- include('../partials/allert', { errorMessage: messages.error?.[0], successMessage:
+                                    messages.success?.[0] }) %>
 
-                            <!-- Flash Messages -->
-                            <%- include('../partials/allert', { errorMessage: messages.error?.[0], successMessage:
-                                messages.success?.[0] }) %>
-
-                                <!-- User Form -->
-                                <form id="userForm" method="post"
-                                    action="<%= userData ? '/users/edit/' + userData.id : '/users/add' %>">
-                                    <div class="card shadow mb-4">
-                                        <div class="card-header py-3">
-                                            <strong class="text-primary">
-                                                <%= userData ? 'Form Edit' : 'Form Add' %>
-                                            </strong>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="form-group row">
-                                                <label for="email" class="col-sm-2 col-form-label">Email</label>
-                                                <div class="col-sm-10">
-                                                    <input type="email" class="form-control" id="email" name="email"
-                                                        value="<%= userData ? userData.email : '' %>" required>
-                                                </div>
+                                    <!-- User Form -->
+                                    <form id="userForm" method="post"
+                                        action="<%= userData ? '/users/edit/' + userData.id : '/users/add' %>">
+                                        <div class="card shadow mb-4">
+                                            <div class="card-header py-3">
+                                                <strong class="text-primary">
+                                                    <%= userData ? 'Form Edit' : 'Form Add' %>
+                                                </strong>
                                             </div>
-
-                                            <div class="form-group row">
-                                                <label for="name" class="col-sm-2 col-form-label">Name</label>
-                                                <div class="col-sm-10">
-                                                    <input type="text" class="form-control" id="name" name="name"
-                                                        value="<%= userData ? userData.name : '' %>" required>
-                                                </div>
-                                            </div>
-
-                                            <% if (!userData) { %>
+                                            <div class="card-body">
                                                 <div class="form-group row">
-                                                    <label for="password"
-                                                        class="col-sm-2 col-form-label">Password</label>
+                                                    <label for="email" class="col-sm-2 col-form-label">Email</label>
                                                     <div class="col-sm-10">
-                                                        <input type="password" class="form-control" id="password"
-                                                            name="password" required>
+                                                        <input type="email" class="form-control" id="email" name="email"
+                                                            value="<%= userData ? userData.email : '' %>" required>
                                                     </div>
                                                 </div>
-                                                <% } %>
 
+                                                <div class="form-group row">
+                                                    <label for="name" class="col-sm-2 col-form-label">Name</label>
+                                                    <div class="col-sm-10">
+                                                        <input type="text" class="form-control" id="name" name="name"
+                                                            value="<%= userData ? userData.name : '' %>" required>
+                                                    </div>
+                                                </div>
+
+                                                <% if (!userData) { %>
                                                     <div class="form-group row">
-                                                        <label class="col-sm-2 col-form-label">Role</label>
+                                                        <label for="password"
+                                                            class="col-sm-2 col-form-label">Password</label>
                                                         <div class="col-sm-10">
-                                                            <div class="form-check">
-                                                                <input class="form-check-input" type="radio" name="role"
-                                                                    id="operator" value="operator" <%=userData &&
-                                                                    userData.role==='operator' ? 'checked' : '' %>
-                                                                required>
-                                                                <label class="form-check-label"
-                                                                    for="operator">Operator</label>
-                                                            </div>
-                                                            <div class="form-check">
-                                                                <input class="form-check-input" type="radio" name="role"
-                                                                    id="admin" value="admin" <%=userData &&
-                                                                    userData.role==='admin' ? 'checked' : '' %>
-                                                                required>
-                                                                <label class="form-check-label"
-                                                                    for="admin">Admin</label>
-                                                            </div>
+                                                            <input type="password" class="form-control" id="password"
+                                                                name="password" required>
                                                         </div>
                                                     </div>
-                                        </div>
+                                                    <% } %>
 
-                                        <div class="card-footer">
-                                            <button type="submit" class="btn btn-success btn-sm btn-icon-split"
-                                                id="saveBtn" disabled>
-                                                <span class="icon text-white-50"><i class="fas fa-save"></i></span>
-                                                <span class="text">Save</span>
-                                            </button>
-                                            <a href="/users" class="btn btn-warning btn-sm btn-icon-split">
-                                                <span class="icon text-white-50"><i class="fas fa-undo"></i></span>
-                                                <span class="text">Back</span>
-                                            </a>
+                                                        <div class="form-group row">
+                                                            <label class="col-sm-2 col-form-label">Role</label>
+                                                            <div class="col-sm-10">
+                                                                <div class="form-check">
+                                                                    <input class="form-check-input" type="radio"
+                                                                        name="role" id="operator" value="operator"
+                                                                        <%=userData && userData.role==='operator'
+                                                                        ? 'checked' : '' %>
+                                                                    required>
+                                                                    <label class="form-check-label"
+                                                                        for="operator">Operator</label>
+                                                                </div>
+                                                                <div class="form-check">
+                                                                    <input class="form-check-input" type="radio"
+                                                                        name="role" id="admin" value="admin" <%=userData
+                                                                        && userData.role==='admin' ? 'checked' : '' %>
+                                                                    required>
+                                                                    <label class="form-check-label"
+                                                                        for="admin">Admin</label>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                            </div>
+
+                                            <div class="card-footer">
+                                                <button type="submit" class="btn btn-success btn-sm btn-icon-split"
+                                                    id="saveBtn" disabled>
+                                                    <span class="icon text-white-50"><i class="fas fa-save"></i></span>
+                                                    <span class="text">Save</span>
+                                                </button>
+                                                <a href="/users" class="btn btn-warning btn-sm btn-icon-split">
+                                                    <span class="icon text-white-50"><i class="fas fa-undo"></i></span>
+                                                    <span class="text">Back</span>
+                                                </a>
+                                            </div>
                                         </div>
-                                    </div>
-                                </form>
+                                    </form>
+                            </div>
                         </div>
                 </div>
 

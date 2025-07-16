@@ -24,459 +24,460 @@
             <div id="content-wrapper" class="d-flex flex-column">
                 <div id="content">
                     <%- include('../partials/topbar.ejs') %>
-                        <div class="container-fluid">
-                            <div class="d-sm-flex align-items-center justify-content-between mb-3">
-                                <h1 class="h3 mb-0 text-gray-800">Purchases</h1>
-                            </div>
-                            <%- include('../partials/allert', { errorMessage: messages.error?.[0], successMessage:
-                                messages.success?.[0] }) %>
-                                <div class="card mb-4">
-                                    <div class="card-header d-flex">
-                                        <h1>Transaction</h1>
-                                    </div>
-                                    <form id="purchaseForm" method="post"
-                                        action="<%= purchase && purchase.invoice ? `/purchases/edit/${purchase.invoice}` : '/purchases/add' %>">
-                                        <input type="hidden" id="isEditMode"
-                                            value="<%= (purchase && purchase.invoice && purchase.Purchaseitems) ? 'true' : 'false' %>">
-                                        <script type="application/json" id="purchase-items-data">
-                                            <%- JSON.stringify(purchase?.Purchaseitems || []) %>
-                                        </script>
-                                        <div class="card-body">
-                                            <div class="form-row mb-5">
-                                                <div class="col-md-4">
-                                                    <label for="invoice">Invoice</label>
-                                                    <input type="text" class="form-control" id="invoice" name="invoice"
-                                                        value="<%= purchase?.invoice || '' %>" readonly>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <label for="time">Time</label>
-                                                    <input type="text" class="form-control" id="time" name="time"
-                                                        value="<%= currentDateTime %>" readonly>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <label>Operator</label>
-                                                    <input type="text" class="form-control"
-                                                        value="<%= user && user.name ? user.name : '' %>" readonly>
-                                                </div>
-                                            </div>
-                                            <hr class="mb-5">
-                                            <div class="form-row align-items-end mb-4">
-                                                <div class="col-md-4">
-                                                    <label>Goods Barcode</label>
-                                                    <select class="form-control" id="barcodeSelect">
-                                                        <% goods.forEach(good=> { %>
-                                                            <option value="<%= good.barcode %>">
-                                                                <%= good.barcode %> - <%= good.name %>
-                                                            </option>
-                                                            <% }); %>
-                                                    </select>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <label>Goods Name</label>
-                                                    <input type="text" id="goodName" class="form-control" readonly>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <label>Stock</label>
-                                                    <input type="text" id="stock" class="form-control" readonly>
-                                                </div>
-                                            </div>
-                                            <div class="form-row align-items-end mb-3">
-                                                <div class="col-md-4">
-                                                    <label>Purchase Price</label>
-                                                    <input type="text" id="purchasePrice" class="form-control" readonly>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <label>Qty</label>
-                                                    <input type="number" id="qty" class="form-control" min="1">
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <label>Total Price</label>
-                                                    <input type="text" id="totalPrice" class="form-control" readonly>
-                                                </div>
-                                            </div>
-                                            <button type="button" id="addItemBtn" class="btn btn-icon-split btn-primary"
-                                                onclick="addItem()">
-                                                <span class="icon text-white-50">
-                                                    <i class="fa fa-plus"></i>
-                                                </span>
-                                                <span class="text">Add</span>
-                                            </button>
-                                        </div>
-                                        <div class="table-responsive">
-                                            <table class="table table-striped mt-3" id="itemsTable">
-                                                <thead>
-                                                    <tr>
-                                                        <th>No.</th>
-                                                        <th>Barcode</th>
-                                                        <th>Name</th>
-                                                        <th>Qty</th>
-                                                        <th>Price</th>
-                                                        <th>Total Price</th>
-                                                        <th>Action</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody id="itemsTbody">
-                                                    <!-- Items will be loaded here -->
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                        <div class="card-footer">
-                                            <div class="row mb-3">
-                                                <label for="totalsum" class="col-sm-2 col-form-label">Total
-                                                    Summary</label>
-                                                <div class="col-sm-10">
-                                                    <input type="text" class="form-control" id="totalsum"
-                                                        name="totalsum"
-                                                        value="<%= formatCurrency(purchase ? purchase.totalsum : 0) %>"
-                                                        readonly>
-                                                </div>
-                                            </div>
-                                            <div class="row mb-3">
-                                                <label for="supplierSelect"
-                                                    class="col-sm-2 col-form-label">Supplier</label>
-                                                <div class="col-sm-10">
-                                                    <select class="form-control" id="supplierSelect" name="supplier">
-                                                        <% suppliers.forEach(supplier=> { %>
-                                                            <option value="<%= supplier.supplierid %>"
-                                                                <%=purchase?.supplier==supplier.supplierid ? 'selected'
-                                                                : '' %>>
-                                                                <%= supplier.name %>
-                                                            </option>
-                                                            <% }); %>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <button type="button" onclick="submitPurchase()"
-                                                class="btn btn-icon-split btn-success">
-                                                <span class="icon text-white-50">
-                                                    <i class="fa fa-check"></i>
-                                                </span>
-                                                <span class="text">Finish</span>
-                                            </button>
-                                            <a href="/purchases" role="button" class="btn btn-icon-split btn-warning">
-                                                <span class="icon text-white-50">
-                                                    <i class="fa fa-arrow-left"></i>
-                                                </span>
-                                                <span class="text">Back</span>
-                                            </a>
-                                        </div>
-                                    </form>
+                        <div id="main-content">
+                            <div class="container-fluid">
+                                <div class="d-sm-flex align-items-center justify-content-between mb-3">
+                                    <h1 class="h3 mb-0 text-gray-800">Purchases</h1>
                                 </div>
+                                <%- include('../partials/allert', { errorMessage: messages.error?.[0], successMessage:
+                                    messages.success?.[0] }) %>
+                                    <div class="card mb-4">
+                                        <div class="card-header d-flex">
+                                            <h1>Transaction</h1>
+                                        </div>
+                                        <form id="purchaseForm" method="post"
+                                            action="<%= purchase && purchase.invoice ? `/purchases/edit/${purchase.invoice}` : '/purchases/add' %>">
+                                            <input type="hidden" id="isEditMode"
+                                                value="<%= (purchase && purchase.invoice && purchase.Purchaseitems) ? 'true' : 'false' %>">
+                                            <script type="application/json" id="purchase-items-data">
+                                                <%- JSON.stringify(purchase?.Purchaseitems || []) %>
+                                            </script>
+                                            <div class="card-body">
+                                                <div class="form-row mb-5">
+                                                    <div class="col-md-4">
+                                                        <label for="invoice">Invoice</label>
+                                                        <input type="text" class="form-control" id="invoice" name="invoice"
+                                                            value="<%= purchase?.invoice || '' %>" readonly>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label for="time">Time</label>
+                                                        <input type="text" class="form-control" id="time" name="time"
+                                                            value="<%= currentDateTime %>" readonly>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label>Operator</label>
+                                                        <input type="text" class="form-control"
+                                                            value="<%= user && user.name ? user.name : '' %>" readonly>
+                                                    </div>
+                                                </div>
+                                                <hr class="mb-5">
+                                                <div class="form-row align-items-end mb-4">
+                                                    <div class="col-md-4">
+                                                        <label>Goods Barcode</label>
+                                                        <select class="form-control" id="barcodeSelect">
+                                                            <% goods.forEach(good=> { %>
+                                                                <option value="<%= good.barcode %>">
+                                                                    <%= good.barcode %> - <%= good.name %>
+                                                                </option>
+                                                                <% }); %>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label>Goods Name</label>
+                                                        <input type="text" id="goodName" class="form-control" readonly>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label>Stock</label>
+                                                        <input type="text" id="stock" class="form-control" readonly>
+                                                    </div>
+                                                </div>
+                                                <div class="form-row align-items-end mb-3">
+                                                    <div class="col-md-4">
+                                                        <label>Purchase Price</label>
+                                                        <input type="text" id="purchasePrice" class="form-control" readonly>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label>Qty</label>
+                                                        <input type="number" id="qty" class="form-control" min="1">
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label>Total Price</label>
+                                                        <input type="text" id="totalPrice" class="form-control" readonly>
+                                                    </div>
+                                                </div>
+                                                <button type="button" id="addItemBtn" class="btn btn-icon-split btn-primary"
+                                                    onclick="addItem()">
+                                                    <span class="icon text-white-50">
+                                                        <i class="fa fa-plus"></i>
+                                                    </span>
+                                                    <span class="text">Add</span>
+                                                </button>
+                                            </div>
+                                            <div class="table-responsive">
+                                                <table class="table table-striped mt-3" id="itemsTable">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>No.</th>
+                                                            <th>Barcode</th>
+                                                            <th>Name</th>
+                                                            <th>Qty</th>
+                                                            <th>Price</th>
+                                                            <th>Total Price</th>
+                                                            <th>Action</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="itemsTbody">
+                                                        <!-- Items will be loaded here -->
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div class="card-footer">
+                                                <div class="row mb-3">
+                                                    <label for="totalsum" class="col-sm-2 col-form-label">Total
+                                                        Summary</label>
+                                                    <div class="col-sm-10">
+                                                        <input type="text" class="form-control" id="totalsum"
+                                                            name="totalsum"
+                                                            value="<%= formatCurrency(purchase ? purchase.totalsum : 0) %>"
+                                                            readonly>
+                                                    </div>
+                                                </div>
+                                                <div class="row mb-3">
+                                                    <label for="supplierSelect"
+                                                        class="col-sm-2 col-form-label">Supplier</label>
+                                                    <div class="col-sm-10">
+                                                        <select class="form-control" id="supplierSelect" name="supplier">
+                                                            <% suppliers.forEach(supplier=> { %>
+                                                                <option value="<%= supplier.supplierid %>"
+                                                                    <%=purchase?.supplier==supplier.supplierid ? 'selected'
+                                                                    : '' %>>
+                                                                    <%= supplier.name %>
+                                                                </option>
+                                                                <% }); %>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <button type="button" onclick="submitPurchase()"
+                                                    class="btn btn-icon-split btn-success">
+                                                    <span class="icon text-white-50">
+                                                        <i class="fa fa-check"></i>
+                                                    </span>
+                                                    <span class="text">Finish</span>
+                                                </button>
+                                                <a href="/purchases" role="button" class="btn btn-icon-split btn-warning">
+                                                    <span class="icon text-white-50">
+                                                        <i class="fa fa-arrow-left"></i>
+                                                    </span>
+                                                    <span class="text">Back</span>
+                                                </a>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                </div>
-                <%- include('../partials/footer') %>
-            </div>
-    </div>
-    <%- include('../partials/scripts.ejs') %>
+                        <%- include('../partials/footer') %>
+                    </div>
+                    <%- include('../partials/scripts.ejs') %>
 
-        <%- include('../partials/delete-modal-confirmation-item') %>
+                        <%- include('../partials/delete-modal-confirmation-item') %>
 
-            <%- include('../partials/logout-modal') %>
+                            <%- include('../partials/logout-modal') %>
 
-                <script type="application/json" id="goods-data">
+                                <script type="application/json" id="goods-data">
 
         <%- JSON.stringify(goods) %>
     </script>
-                <script>
-                    function formatCurrency(amount) {
-                        if (!amount && amount !== 0) return 'Rp 0,00';
-                        const num = parseFloat(amount);
-                        if (isNaN(num)) return 'Rp 0,00';
-                        const formatted = num.toLocaleString('id-ID', {
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2
-                        });
-                        return `Rp ${formatted}`;
-                    }
-
-                    function showToast(message, type = 'success') {
-                        Toastify({
-                            text: message,
-                            duration: 3000,
-                            gravity: 'top',
-                            position: 'right',
-                            backgroundColor: type === 'success' ? '#28a745' : '#dc3545'
-                        }).showToast();
-                    }
-
-                    function calculateTotal() {
-                        const price = parseFloat(purchasePriceInput.value);
-                        const qty = parseFloat(quantityInput.value);
-                        if (!isNaN(price) && !isNaN(qty)) {
-                            const total = price * qty;
-                            totalPriceInput.value = total.toLocaleString('id-ID', {
-                                style: 'currency',
-                                currency: 'IDR'
-                            });
-                        } else {
-                            totalPriceInput.value = '';
-                        }
-                    }
-
-                    function renderItems(items) {
-                        const tbody = document.getElementById('itemsTbody');
-                        tbody.innerHTML = '';
-                        let sum = 0;
-
-                        items.forEach((item, idx) => {
-                            const tr = document.createElement('tr');
-                            const total = item.purchaseprice * item.quantity;
-                            sum += total;
-
-                            const itemIdentifier = isEditMode ? item.id : item.itemcode;
-
-                            tr.innerHTML = `
-                                <td>${idx + 1}</td>
-                                <td>${item.itemcode}</td>
-                                <td>${item.Goods ? item.Goods.name : item.name || ''}</td>
-                                <td>${item.quantity}</td>
-                                <td>${formatCurrency(item.purchaseprice)}</td>
-                                <td>${formatCurrency(total)}</td>
-                                <td>
-                                    <button type="button" class="btn btn-outline-danger btn-circle btn-sm shadow-sm"
-                                        onclick="showDeleteItemModal('${itemIdentifier}')" title="Hapus Item">
-                                        <i class="fa fa-trash"></i>
-                                    </button>
-                                </td>
-                            `;
-                            tbody.appendChild(tr);
-                        });
-
-                        document.getElementById('totalsum').value = formatCurrency(sum);
-                    }
-
-                    function loadExistingItems() {
-                        const existingItems = JSON.parse('<%- JSON.stringify(purchase?.Purchaseitems || []) %>');
-                        renderItems(existingItems);
-                    }
-
-                    function fetchUpdatedItems() {
-                        fetch(`/purchases/edit/${invoice}`)
-                            .then(res => res.text())
-                            .then(html => {
-                                const parser = new DOMParser();
-                                const doc = parser.parseFromString(html, 'text/html');
-                                const updatedItems = JSON.parse(doc.getElementById('purchase-items-data').textContent);
-                                renderItems(updatedItems);
-                            })
-                            .catch(err => {
-                                console.error('Error fetching updated items:', err);
-                                location.reload();
-                            });
-                    }
-
-                    function showDeleteItemModal(itemId) {
-                        window.itemIdToDelete = itemId;
-                        $('#deleteItemModal').modal('show');
-                    }
-
-                    // inisialisasi data & elemen
-                    const goodsData = JSON.parse(document.getElementById('goods-data').textContent);
-                    const barcodeSelect = document.getElementById('barcodeSelect');
-                    const goodNameInput = document.getElementById('goodName');
-                    const stockInput = document.getElementById('stock');
-                    const purchasePriceInput = document.getElementById('purchasePrice');
-                    const quantityInput = document.getElementById('qty');
-                    const totalPriceInput = document.getElementById('totalPrice');
-                    const invoice = document.getElementById('invoice').value;
-                    const isEditMode = document.getElementById('isEditMode').value === 'true';
-
-                    if (!isEditMode) {
-                        window.tempItems = [];
-                    }
-                    if (isEditMode) {
-                        loadExistingItems();
-                    }
-
-                    // Event Listener
-                    barcodeSelect.addEventListener('change', function () {
-                        const selectedBarcode = this.value;
-                        const selectedGood = goodsData.find(g => g.barcode === selectedBarcode);
-
-                        if (selectedGood) {
-                            goodNameInput.value = selectedGood.name;
-                            stockInput.value = selectedGood.stock;
-                            purchasePriceInput.value = selectedGood.purchaseprice;
-                            calculateTotal();
-                        } else {
-                            goodNameInput.value = '';
-                            stockInput.value = '';
-                            purchasePriceInput.value = '';
-                        }
-                    });
-
-                    quantityInput.addEventListener('input', calculateTotal);
-                    document.getElementById('purchaseForm').addEventListener('submit', function (e) {
-                        e.preventDefault();
-                        submitPurchase();
-                    });
-
-                    // trigger perubahan pertama
-                    barcodeSelect.dispatchEvent(new Event('change'));
-
-                    // add item daftar
-                    window.addItem = function () {
-                        const itemcode = barcodeSelect.value;
-                        const good = goodsData.find(g => g.barcode === itemcode);
-                        const quantity = parseInt(quantityInput.value);
-                        const purchaseprice = parseFloat(purchasePriceInput.value);
-                        const totalprice = purchaseprice * quantity;
-
-                        if (!itemcode || !good || isNaN(quantity) || isNaN(purchaseprice)) {
-                            showToast('Silakan lengkapi data barang.', 'error');
-                            return;
-                        }
-
-                        if (quantity < 1) {
-                            showToast('Jumlah minimal 1.', 'error');
-                            return;
-                        }
-
-                        if (isEditMode) {
-                            fetch(`/purchases/edit/${invoice}/item`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ itemcode, quantity, purchaseprice, totalprice })
-                            })
-                                .then(res => res.json())
-                                .then(data => {
-                                    if (data.error) {
-                                        showToast(data.error, 'error');
-                                    } else {
-                                        fetchUpdatedItems();
-                                        quantityInput.value = '';
-                                        totalPriceInput.value = '';
-                                    }
-                                })
-                                .catch(err => {
-                                    showToast('Gagal menambah item: ' + err.message, 'error');
-                                });
-                        } else {
-                            // simpan array (add mode)
-                            const newItem = {
-                                itemcode,
-                                name: good.name,
-                                quantity,
-                                purchaseprice
-                            };
-
-                            const existingIndex = window.tempItems.findIndex(item => item.itemcode === itemcode);
-                            if (existingIndex !== -1) {
-                                showToast('Barang ini sudah ada dalam daftar.', 'error');
-                                return;
-                            }
-
-                            window.tempItems.push(newItem);
-                            renderItems(window.tempItems);
-                            quantityInput.value = '';
-                            totalPriceInput.value = '';
-                        }
-                    }
-
-                    // hapus item daftar
-                    document.addEventListener('DOMContentLoaded', function () {
-                        document.body.setAttribute('tabindex', '-1');
-
-                        const confirmDeleteItemBtn = document.getElementById('confirmDeleteItemBtn');
-                        if (confirmDeleteItemBtn) {
-                            confirmDeleteItemBtn.onclick = function () {
-                                if (!window.itemIdToDelete) return;
-
-                                if (isEditMode) {
-                                    fetch(`/purchases/delete/${window.itemIdToDelete}/item`, { method: 'POST' })
-                                        .then(res => res.json())
-                                        .then(data => {
-                                            if (data.error) {
-                                                showToast(data.error, 'error');
-                                            } else {
-                                                fetchUpdatedItems();
-                                                showToast('Item dihapus dari daftar.', 'success');
-                                            }
-                                        })
-                                        .catch(err => {
-                                            showToast('Gagal menghapus item: ' + err.message, 'error');
+                                <script>
+                                    function formatCurrency(amount) {
+                                        if (!amount && amount !== 0) return 'Rp 0,00';
+                                        const num = parseFloat(amount);
+                                        if (isNaN(num)) return 'Rp 0,00';
+                                        const formatted = num.toLocaleString('id-ID', {
+                                            minimumFractionDigits: 2,
+                                            maximumFractionDigits: 2
                                         });
-                                } else {
-                                    // hapus item array
-                                    const index = window.tempItems.findIndex(item => item.itemcode === window.itemIdToDelete);
-                                    if (index !== -1) {
-                                        window.tempItems.splice(index, 1);
-                                        renderItems(window.tempItems);
-                                        showToast('Item dihapus dari daftar.', 'success');
+                                        return `Rp ${formatted}`;
                                     }
-                                }
 
-                                document.body.focus();
-                                $('#deleteItemModal').modal('hide');
-                                window.itemIdToDelete = null;
-                            }
-                        }
-                    });
-
-                    window.submitPurchase = function () {
-                        const supplier = document.getElementById('supplierSelect').value;
-                        const time = document.getElementById('time').value;
-                        let totalsumRaw = document.getElementById('totalsum').value;
-                        let totalsum = parseFloat(totalsumRaw.replace(/[^\d.]/g, ''));
-                        if (isNaN(totalsum)) totalsum = 0;
-
-                        if (!supplier) {
-                            showToast('Silakan pilih supplier.', 'error');
-                            return;
-                        }
-
-                        if (isEditMode) {
-                            // Update data purchase
-                            fetch(`/purchases/edit/${invoice}`, {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ time, supplier, totalsum })
-                            })
-                                .then(res => res.json())
-                                .then(data => {
-                                    if (data.error) {
-                                        showToast(data.error, 'error');
-                                    } else {
-                                        showToast('Purchase berhasil diupdate!', 'success');
-                                        setTimeout(() => {
-                                            window.location.href = '/purchases';
-                                        }, 1000);
+                                    function showToast(message, type = 'success') {
+                                        Toastify({
+                                            text: message,
+                                            duration: 3000,
+                                            gravity: 'top',
+                                            position: 'right',
+                                            backgroundColor: type === 'success' ? '#28a745' : '#dc3545'
+                                        }).showToast();
                                     }
-                                })
-                                .catch(err => {
-                                    showToast('Gagal menyimpan purchase: ' + err.message, 'error');
-                                });
 
-                        } else {
-                            // Submit data baru
-                            if (window.tempItems.length === 0) {
-                                showToast('Transaksi harus memiliki minimal 1 item.', 'error');
-                                return;
-                            }
-
-                            fetch('/purchases/add', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ supplier, items: window.tempItems, invoice })
-                            })
-                                .then(res => res.json())
-                                .then(data => {
-                                    if (data.error) {
-                                        showToast(data.error, 'error');
-                                    } else {
-                                        showToast('Purchase berhasil disimpan!', 'success');
-                                        setTimeout(() => {
-                                            window.location.href = '/purchases';
-                                        }, 1000);
+                                    function calculateTotal() {
+                                        const price = parseFloat(purchasePriceInput.value);
+                                        const qty = parseFloat(quantityInput.value);
+                                        if (!isNaN(price) && !isNaN(qty)) {
+                                            const total = price * qty;
+                                            totalPriceInput.value = total.toLocaleString('id-ID', {
+                                                style: 'currency',
+                                                currency: 'IDR'
+                                            });
+                                        } else {
+                                            totalPriceInput.value = '';
+                                        }
                                     }
-                                })
-                                .catch(err => {
-                                    showToast('Gagal menyimpan purchase: ' + err.message, 'error');
-                                });
-                        }
-                    }
+
+                                    function renderItems(items) {
+                                        const tbody = document.getElementById('itemsTbody');
+                                        tbody.innerHTML = '';
+                                        let sum = 0;
+
+                                        items.forEach((item, idx) => {
+                                            const tr = document.createElement('tr');
+                                            const total = item.purchaseprice * item.quantity;
+                                            sum += total;
+
+                                            const itemIdentifier = isEditMode ? item.id : item.itemcode;
+
+                                            tr.innerHTML = `
+                                                <td>${idx + 1}</td>
+                                                <td>${item.itemcode}</td>
+                                                <td>${item.Goods ? item.Goods.name : item.name || ''}</td>
+                                                <td>${item.quantity}</td>
+                                                <td>${formatCurrency(item.purchaseprice)}</td>
+                                                <td>${formatCurrency(total)}</td>
+                                                <td>
+                                                    <button type="button" class="btn btn-outline-danger btn-circle btn-sm shadow-sm"
+                                                        onclick="showDeleteItemModal('${itemIdentifier}')" title="Hapus Item">
+                                                        <i class="fa fa-trash"></i>
+                                                    </button>
+                                                </td>
+                                            `;
+                                            tbody.appendChild(tr);
+                                        });
+
+                                        document.getElementById('totalsum').value = formatCurrency(sum);
+                                    }
+
+                                    function loadExistingItems() {
+                                        const existingItems = JSON.parse('<%- JSON.stringify(purchase?.Purchaseitems || []) %>');
+                                        renderItems(existingItems);
+                                    }
+
+                                    function fetchUpdatedItems() {
+                                        fetch(`/purchases/edit/${invoice}`)
+                                            .then(res => res.text())
+                                            .then(html => {
+                                                const parser = new DOMParser();
+                                                const doc = parser.parseFromString(html, 'text/html');
+                                                const updatedItems = JSON.parse(doc.getElementById('purchase-items-data').textContent);
+                                                renderItems(updatedItems);
+                                            })
+                                            .catch(err => {
+                                                console.error('Error fetching updated items:', err);
+                                                location.reload();
+                                            });
+                                    }
+
+                                    function showDeleteItemModal(itemId) {
+                                        window.itemIdToDelete = itemId;
+                                        $('#deleteItemModal').modal('show');
+                                    }
+
+                                    // inisialisasi data & elemen
+                                    const goodsData = JSON.parse(document.getElementById('goods-data').textContent);
+                                    const barcodeSelect = document.getElementById('barcodeSelect');
+                                    const goodNameInput = document.getElementById('goodName');
+                                    const stockInput = document.getElementById('stock');
+                                    const purchasePriceInput = document.getElementById('purchasePrice');
+                                    const quantityInput = document.getElementById('qty');
+                                    const totalPriceInput = document.getElementById('totalPrice');
+                                    const invoice = document.getElementById('invoice').value;
+                                    const isEditMode = document.getElementById('isEditMode').value === 'true';
+
+                                    if (!isEditMode) {
+                                        window.tempItems = [];
+                                    }
+                                    if (isEditMode) {
+                                        loadExistingItems();
+                                    }
+
+                                    // Event Listener
+                                    barcodeSelect.addEventListener('change', function () {
+                                        const selectedBarcode = this.value;
+                                        const selectedGood = goodsData.find(g => g.barcode === selectedBarcode);
+
+                                        if (selectedGood) {
+                                            goodNameInput.value = selectedGood.name;
+                                            stockInput.value = selectedGood.stock;
+                                            purchasePriceInput.value = selectedGood.purchaseprice;
+                                            calculateTotal();
+                                        } else {
+                                            goodNameInput.value = '';
+                                            stockInput.value = '';
+                                            purchasePriceInput.value = '';
+                                        }
+                                    });
+
+                                    quantityInput.addEventListener('input', calculateTotal);
+                                    document.getElementById('purchaseForm').addEventListener('submit', function (e) {
+                                        e.preventDefault();
+                                        submitPurchase();
+                                    });
+
+                                    // trigger perubahan pertama
+                                    barcodeSelect.dispatchEvent(new Event('change'));
+
+                                    // add item daftar
+                                    window.addItem = function () {
+                                        const itemcode = barcodeSelect.value;
+                                        const good = goodsData.find(g => g.barcode === itemcode);
+                                        const quantity = parseInt(quantityInput.value);
+                                        const purchaseprice = parseFloat(purchasePriceInput.value);
+                                        const totalprice = purchaseprice * quantity;
+
+                                        if (!itemcode || !good || isNaN(quantity) || isNaN(purchaseprice)) {
+                                            showToast('Silakan lengkapi data barang.', 'error');
+                                            return;
+                                        }
+
+                                        if (quantity < 1) {
+                                            showToast('Jumlah minimal 1.', 'error');
+                                            return;
+                                        }
+
+                                        if (isEditMode) {
+                                            fetch(`/purchases/edit/${invoice}/item`, {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ itemcode, quantity, purchaseprice, totalprice })
+                                            })
+                                                .then(res => res.json())
+                                                .then(data => {
+                                                    if (data.error) {
+                                                        showToast(data.error, 'error');
+                                                    } else {
+                                                        fetchUpdatedItems();
+                                                        quantityInput.value = '';
+                                                        totalPriceInput.value = '';
+                                                    }
+                                                })
+                                                .catch(err => {
+                                                    showToast('Gagal menambah item: ' + err.message, 'error');
+                                                });
+                                        } else {
+                                            // simpan array (add mode)
+                                            const newItem = {
+                                                itemcode,
+                                                name: good.name,
+                                                quantity,
+                                                purchaseprice
+                                            };
+
+                                            const existingIndex = window.tempItems.findIndex(item => item.itemcode === itemcode);
+                                            if (existingIndex !== -1) {
+                                                showToast('Barang ini sudah ada dalam daftar.', 'error');
+                                                return;
+                                            }
+
+                                            window.tempItems.push(newItem);
+                                            renderItems(window.tempItems);
+                                            quantityInput.value = '';
+                                            totalPriceInput.value = '';
+                                        }
+                                    }
+
+                                    // hapus item daftar
+                                    document.addEventListener('DOMContentLoaded', function () {
+                                        document.body.setAttribute('tabindex', '-1');
+
+                                        const confirmDeleteItemBtn = document.getElementById('confirmDeleteItemBtn');
+                                        if (confirmDeleteItemBtn) {
+                                            confirmDeleteItemBtn.onclick = function () {
+                                                if (!window.itemIdToDelete) return;
+
+                                                if (isEditMode) {
+                                                    fetch(`/purchases/delete/${window.itemIdToDelete}/item`, { method: 'POST' })
+                                                        .then(res => res.json())
+                                                        .then(data => {
+                                                            if (data.error) {
+                                                                showToast(data.error, 'error');
+                                                            } else {
+                                                                fetchUpdatedItems();
+                                                                showToast('Item dihapus dari daftar.', 'success');
+                                                            }
+                                                        })
+                                                        .catch(err => {
+                                                            showToast('Gagal menghapus item: ' + err.message, 'error');
+                                                        });
+                                                } else {
+                                                    // hapus item array
+                                                    const index = window.tempItems.findIndex(item => item.itemcode === window.itemIdToDelete);
+                                                    if (index !== -1) {
+                                                        window.tempItems.splice(index, 1);
+                                                        renderItems(window.tempItems);
+                                                        showToast('Item dihapus dari daftar.', 'success');
+                                                    }
+                                                }
+
+                                                document.body.focus();
+                                                $('#deleteItemModal').modal('hide');
+                                                window.itemIdToDelete = null;
+                                            }
+                                        }
+                                    });
+
+                                    window.submitPurchase = function () {
+                                        const supplier = document.getElementById('supplierSelect').value;
+                                        const time = document.getElementById('time').value;
+                                        let totalsumRaw = document.getElementById('totalsum').value;
+                                        let totalsum = parseFloat(totalsumRaw.replace(/[^\d.]/g, ''));
+                                        if (isNaN(totalsum)) totalsum = 0;
+
+                                        if (!supplier) {
+                                            showToast('Silakan pilih supplier.', 'error');
+                                            return;
+                                        }
+
+                                        if (isEditMode) {
+                                            // Update data purchase
+                                            fetch(`/purchases/edit/${invoice}`, {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ time, supplier, totalsum })
+                                            })
+                                                .then(res => res.json())
+                                                .then(data => {
+                                                    if (data.error) {
+                                                        showToast(data.error, 'error');
+                                                    } else {
+                                                        showToast('Purchase berhasil diupdate!', 'success');
+                                                        setTimeout(() => {
+                                                            window.location.href = '/purchases';
+                                                        }, 1000);
+                                                    }
+                                                })
+                                                .catch(err => {
+                                                    showToast('Gagal menyimpan purchase: ' + err.message, 'error');
+                                                });
+
+                                        } else {
+                                            // Submit data baru
+                                            if (window.tempItems.length === 0) {
+                                                showToast('Transaksi harus memiliki minimal 1 item.', 'error');
+                                                return;
+                                            }
+
+                                            fetch('/purchases/add', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ supplier, items: window.tempItems, invoice })
+                                            })
+                                                .then(res => res.json())
+                                                .then(data => {
+                                                    if (data.error) {
+                                                        showToast(data.error, 'error');
+                                                    } else {
+                                                        showToast('Purchase berhasil disimpan!', 'success');
+                                                        setTimeout(() => {
+                                                            window.location.href = '/purchases';
+                                                        }, 1000);
+                                                    }
+                                                })
+                                                .catch(err => {
+                                                    showToast('Gagal menyimpan purchase: ' + err.message, 'error');
+                                                });
+                                        }
+                                    }
   
-                </script>
+                                </script>
 </body>
 
 </html>
