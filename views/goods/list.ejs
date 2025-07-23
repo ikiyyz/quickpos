@@ -25,7 +25,6 @@
             <div id="content-wrapper" class="d-flex flex-column">
                 <div id="content">
                     <%- include('../partials/topbar') %>
-                    <div id="main-content">
                         <div class="container-fluid">
                             <!-- Page Heading -->
                             <div class="d-sm-flex align-items-center justify-content-between mb-4">
@@ -88,7 +87,8 @@
                                                                 <td data-order="<%= good.stock %>">
                                                                     <%= good.stock %>
                                                                 </td>
-                                                                <td data-order="<%= good.unitData?.name || good.unit %>">
+                                                                <td
+                                                                    data-order="<%= good.unitData?.name || good.unit %>">
                                                                     <%= good.unitData?.name || good.unit %>
                                                                 </td>
                                                                 <td data-order="<%= good.purchaseprice %>">
@@ -107,11 +107,11 @@
                                                                 <td class="text-center align-middle">
                                                                     <% if (good.picture) { %>
                                                                         <img src="<%= good.picture %>"
-                                                                             alt="<%= good.name %>" class="img-thumbnail"
-                                                                             style="max-width: 150px; height: auto;">
-                                                                    <% } else { %>
-                                                                        -
-                                                                    <% } %>
+                                                                            alt="<%= good.name %>" class="img-thumbnail"
+                                                                            style="max-width: 150px; height: auto;">
+                                                                        <% } else { %>
+                                                                            -
+                                                                            <% } %>
                                                                 </td>
                                                                 <td>
                                                                     <a href="/goods/edit/<%= good.barcode %>"
@@ -143,14 +143,13 @@
                                     </div>
                                 </div>
                         </div>
-                    </div>
                 </div>
                 <%- include('../partials/footer') %>
             </div>
     </div>
 
     <%- include('../partials/delete-modal-confirmation') %>
-    
+
         <%- include('../partials/scripts') %>
 
             <script>

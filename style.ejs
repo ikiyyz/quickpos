@@ -1,362 +1,197 @@
-<!DOCTYPE html>
-<html lang="en">
+class SidebarNavigator {
+  constructor() {
+      this.isNavigating = false;
+      this.cache = new Map();
+      this.currentPath = window.location.pathname;
+      this.init();
+  }
 
-<head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
-    <meta name="description" content="" />
-    <meta name="author" content="" />
+  init() {
+      this.bindNavigationLinks();
+      this.handlePopState();
+      this.updateActiveState();
+  }
 
-    <title>Login</title>
-
-    <!-- Custom fonts for this template-->
-    <link href="/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
-    <link
-        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
-        rel="stylesheet">
-
-    <!-- Custom styles for this template-->
-    <link href="/stylesheets/sb-admin-2.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-</head>
-
-<body class="bg-gradient-primary">
-    <div class="container">
-        <!-- Outer Row -->
-        <div class="row justify-content-center">
-            <div class="col-xl-10 col-lg-12 col-md-9">
-                <div class="card o-hidden border-0 shadow-lg my-5">
-                    <div class="card-body p-0">
-                        <!-- Nested Row within Card Body -->
-                        <div class="row">
-                            <div class="col-lg-6 d-none d-lg-block bg-login-image"></div>
-                            <div class="col-lg-6">
-                                <div class="p-5">
-                                    <div class="text-center">
-                                        <h1 class="h4 text-gray-900 mb-4">Welcome Back!</h1>
-                                    </div>
-
-                                    <!-- FORM LOGIN -->
-                                    <form class="user" method="POST" action="/login">
-                                        <div class="form-group">
-                                            <input type="email" name="email" class="form-control form-control-user"
-                                                id="exampleInputEmail" aria-describedby="emailHelp"
-                                                placeholder="Enter Email Address..." required />
-                                        </div>
-                                        <div class="form-group">
-                                            <input type="password" name="password"
-                                                class="form-control form-control-user" id="exampleInputPassword"
-                                                placeholder="Password" required />
-                                        </div>
-                                        <div class="form-group">
-                                            <div class="custom-control custom-checkbox small">
-                                                <input type="checkbox" class="custom-control-input" id="customCheck"
-                                                    name="remember" />
-                                                <label class="custom-control-label" for="customCheck">Remember
-                                                    Me</label>
-                                            </div>
-                                        </div>
-                                        <button type="submit" class="btn btn-primary btn-user btn-block">
-                                            Login
-                                        </button>
-                                    </form>
-
-                                    <% if (messages?.error?.length) { %>
-                                    <script>
-                                        document.addEventListener('DOMContentLoaded', function () {
-                                            Swal.fire({
-                                                icon: 'error',
-                                                title: 'Oops...',
-                                                text: '<%= messages.error[0] %>',
-                                                confirmButtonColor: '#e74a3b',
-                                                confirmButtonText: 'OK',
-                                                allowOutsideClick: true,
-                                                allowEscapeKey: true
-                                            });
-                                        });
-                                    </script>
-                                    <% } %>
-                                    <% if (messages?.success?.length) { %>
-                                    <script>
-                                        document.addEventListener('DOMContentLoaded', function () {
-                                            Swal.fire({
-                                                icon: 'success',
-                                                title: 'Berhasil!',
-                                                text: '<%= messages.success[0] %>',
-                                                confirmButtonColor: '#1cc88a',
-                                                confirmButtonText: 'OK',
-                                                allowOutsideClick: true,
-                                                allowEscapeKey: true
-                                            });
-                                        });
-                                    </script>
-                                    <% } %>
-
-                                    <div class="text-center">
-                                        <a class="small" href="/forgot-password">Forgot Password?</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <%- include('../partials/scripts') %>
-</body>
-
-</html>
-
-const express = require('express');
-const { checkLogin, generateInvoice, formatCurrency } = require('../helpers/utils');
-const router = express.Router();
-const { Purchase, Purchaseitem, Supplier, User, Goods } = require('../models');
-const moment = require('moment');
-
-module.exports = function (db) {
-  router.get('/', checkLogin, async function (req, res) {
-    try {
-      const purchases = await Purchase.findAll({
-        include: [
-          {
-            model: Supplier
+  bindNavigationLinks() {
+      document.querySelectorAll('.nav-link, .collapse-item').forEach(link => {
+          if (this.shouldIntercept(link)) {
+              link.addEventListener('click', (e) => this.handleNavigation(e, link));
           }
-        ]
       });
+  }
 
-      res.render('purchases/list', {
-        user: req.session.user,
-        purchases,
-        moment,
-        formatCurrency,
-        title: 'Purchases',
-        messages: req.flash()
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  });
+  shouldIntercept(link) {
+      const href = link.getAttribute('href');
+      return href && href.startsWith('/') && !href.includes('#') && !link.hasAttribute('data-toggle') && !link.classList.contains('sidebar-brand');
+  }
 
-  router.get('/add', checkLogin, async function (req, res) {
-    try {
-      const suppliers = await Supplier.findAll();
-      const goods = await Goods.findAll();
-      const now = moment();
-      const currentDateTime = now.format('DD MMM YYYY HH:mm:ss');
-      const invoice = await generateInvoice(Purchase.sequelize);
-      
-      res.render('purchases/form', {
-        user: req.session.user,
-        purchase: { invoice },
-        currentDateTime,
-        goods,
-        suppliers,
-        formatCurrency,
-        title: 'Add Purchase',
-        messages: req.flash()
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  });
+  async handleNavigation(e, link) {
+      if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
+      e.preventDefault();
+      if (this.isNavigating) return;
 
-  // Create new purchase
-  router.post('/add', checkLogin, async function (req, res) {
-    try {
-      const { supplier, items, invoice } = req.body;
-      
-      if (!items || !Array.isArray(items) || items.length === 0) {
-        return res.status(400).json({ error: 'Minimal 1 item harus diisi.' });
+      const href = link.getAttribute('href');
+      this.isNavigating = true;
+
+      try {
+          const content = await this.fetchContent(href);
+          if (content) {
+              this.updateContent(content);
+              this.updateHistory(href);
+              this.updateActiveState();
+              this.reinitializeComponents();
+              this.scrollToTop();
+          } else {
+              window.location.href = href; // fallback only if AJAX fails
+          }
+      } catch (error) {
+          window.location.href = href;
+      } finally {
+          this.isNavigating = false;
       }
-      
-      const operator = req.session.user && req.session.user.userid;
-      let totalsum = 0;
-      const purchaseItems = items.map(item => {
-        const quantity = parseInt(item.quantity);
-        const purchaseprice = parseFloat(item.purchaseprice);
-        const totalprice = purchaseprice * quantity;
-        totalsum += totalprice;
-        return {
-          invoice,
-          itemcode: item.itemcode,
-          quantity,
-          purchaseprice,
-          totalprice
-        };
-      });
+  }
 
-      await Purchase.create({
-        invoice,
-        supplier,
-        operator,
-        totalsum,
-        time: new Date()
-      });
+  async fetchContent(url) {
+      try {
+          const response = await fetch(url, {
+              headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'text/html' }
+          });
+          if (!response.ok) throw new Error(`HTTP ${response.status}`);
+          const html = await response.text();
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(html, 'text/html');
+          const mainContent = doc.querySelector('#content');
+          return mainContent ? mainContent.innerHTML : null;
+      } catch {
+          return null;
+      }
+  }
 
-      await Purchaseitem.bulkCreate(purchaseItems);
-
-      req.flash('success', 'Purchase berhasil disimpan');
-      res.status(201).json({ success: true, invoice });
-    } catch (error) {
-      console.log(error);
-      res.status(400).json({ error: error.message });
-    }
-  });
-
-  router.get('/edit/:invoice', checkLogin, async function (req, res) {
-    try {
-      const purchase = await Purchase.findOne({
-        where: { invoice: req.params.invoice },
-        include: [
-          {
-            model: User,
-            as: 'operatorUser',
-            attributes: ['id', 'name', 'email']
-          },
-          {
-            model: Purchaseitem,
-            include: [
-              {
-                model: Goods,
-                attributes: ['name']
+  updateContent(content) {
+      const mainContent = document.querySelector('#content');
+      if (mainContent) {
+          mainContent.innerHTML = content;
+          // Eksekusi semua script inline di mainContent
+          mainContent.querySelectorAll('script').forEach(script => {
+              if (script.textContent && script.textContent.trim()) {
+                  try {
+                      eval(script.textContent);
+                  } catch (e) {
+                      console.error('Script eval error:', e);
+                  }
               }
-            ]
-          }
-        ]
-      });
-
-      const suppliers = await Supplier.findAll();
-      const goods = await Goods.findAll();
-
-      const now = moment();
-      const currentDateTime = now.format('DD MMM YYYY HH:mm:ss');
-
-      res.render('purchases/form', { 
-        user: req.session.user, 
-        purchase, 
-        currentDateTime, 
-        goods, 
-        suppliers,
-        formatCurrency,
-        title: 'Edit Purchase',
-        messages: req.flash()
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  });
-
-  router.post('/edit/:invoice/item', checkLogin, async function (req, res) {
-    const { invoice } = req.params;
-    const { itemcode, quantity, purchaseprice, totalprice } = req.body;
-
-    try {
-      // Check if purchase exists first
-      const purchase = await Purchase.findOne({ where: { invoice } });
-      if (!purchase) {
-        return res.status(404).json({ error: 'Purchase tidak ditemukan' });
+          });
       }
+  }
 
-      const purchaseItem = await Purchaseitem.create({ 
-        invoice, 
-        itemcode, 
-        quantity, 
-        purchaseprice, 
-        totalprice 
+  updateHistory(url) {
+      this.currentPath = url;
+      window.history.pushState({ url }, '', url);
+  }
+
+  handlePopState() {
+      window.addEventListener('popstate', (e) => {
+          if (e.state && e.state.url) {
+              this.handleNavigation({ preventDefault: () => { } }, { getAttribute: () => e.state.url });
+          }
       });
-      
-      const item = await Purchaseitem.findOne({
-        where: { id: purchaseItem.id },
-        include: [{
-          model: Goods,
-          attributes: ['stock']
-        }]
+  }
+
+  updateActiveState() {
+      const path = this.currentPath || window.location.pathname;
+
+      // Remove all active states
+      this.clearActiveStates();
+
+      // Set active states based on current path
+      this.setActiveState(path);
+
+      // Handle collapse state for goods utilities
+      this.handleCollapseState(path);
+  }
+
+  clearActiveStates() {
+      document.querySelectorAll('.nav-item.active, .collapse-item.active').forEach(el => {
+          el.classList.remove('active');
       });
-      
-      res.status(201).json({ purchase, item });
-    } catch (error) {
-      console.log(error);
-      res.status(400).json({ error: error.message });
-    }
-  });
+  }
 
-  router.post('/edit/:invoice', checkLogin, async function (req, res) {
-    const { invoice } = req.params;
-    const { time, supplier, totalsum } = req.body;
+  setActiveState(path) {
+      const navMap = {
+          '/dashboard': 'dashboard',
+          '/goods': 'goods',
+          '/units': 'units',
+          '/suppliers': 'suppliers',
+          '/customers': 'customers',
+          '/users': 'users',
+          '/purchases': 'purchases',
+          '/sales': 'sales'
+      };
 
-    try {
-      const item = await Purchase.update(
-        { time, supplier, totalsum },
-        { where: { invoice } }
-      );
-      res.status(201).json(item);
-    } catch (error) {
-      console.log(error);
-      res.status(400).json({ error: error.message });
-    }
-  });
+      // Find matching nav item
+      for (const [route, navKey] of Object.entries(navMap)) {
+          if (path.startsWith(route)) {
+              const navItem = document.querySelector(`[data-nav="${navKey}"]`);
+              if (navItem) {
+                  navItem.classList.add('active');
+              }
 
-  // Delete purchase
-  router.post('/delete/:invoice', checkLogin, async (req, res) => {
-    const { invoice } = req.params;
+              // Handle collapse items
+              if (navKey === 'goods' || navKey === 'units') {
+                  const collapseItem = document.querySelector(`[data-nav="${navKey}"]`);
+                  if (collapseItem) {
+                      collapseItem.classList.add('active');
+                  }
+              }
+              break;
+          }
+      }
+  }
 
-    try {
-      // Delete items first (due to foreign key constraints)
-      await Purchaseitem.destroy({ where: { invoice } });
-      
-      // Then delete purchase
-      await Purchase.destroy({ where: { invoice } });
-      
-      res.redirect('/purchases');
-    } catch (error) {
-      console.log(error);
-      res.status(500).send('Gagal menghapus purchase');
-    }
-  });
+  handleCollapseState(path) {
+      // Pastikan collapse dibuka jika path goods/units
+      if (path.startsWith('/goods') || path.startsWith('/units')) {
+          const collapseGoods = document.querySelector('#collapseGoods');
+          if (collapseGoods && !collapseGoods.classList.contains('show')) {
+              collapseGoods.classList.add('show');
+          }
+      }
+  }
 
-  router.post('/delete/:id/item', checkLogin, async (req, res) => {
-    const { id } = req.params;
+  handleCollapse(e, toggle) {
+      // Let Bootstrap handle the collapse animation
+      // We just need to ensure proper state management
+      const targetId = toggle.getAttribute('data-target');
+      const target = document.querySelector(targetId);
 
-    try {
-      await Purchaseitem.destroy({ where: { id } });
-      res.redirect('back');
-    } catch (error) {
-      console.log(error);
-      res.status(500).send('Gagal menghapus item');
-    }
-  });
+      if (target) {
+          const isExpanded = toggle.getAttribute('aria-expanded') === 'true';
+          toggle.setAttribute('aria-expanded', !isExpanded);
+          toggle.classList.toggle('collapsed', isExpanded);
+      }
+  }
 
-  return router;
+  reinitializeComponents() {
+      // Inisialisasi DataTables pada tabel sales
+      if (typeof initDataTable === 'function') {
+          initDataTable();
+      }
+      if (typeof initDashboardCharts === 'function') initDashboardCharts();
+      if (typeof initDashboardChartsPie === 'function') initDashboardChartsPie();
+      if (typeof $ !== 'undefined') {
+          $('[data-toggle="tooltip"]').tooltip();
+          $('[data-toggle="popover"]').popover();
+      }
+  }
+
+  scrollToTop() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+// Initialize the navigator
+const sidebarNavigator = new SidebarNavigator();
+// Legacy function for backward compatibility
+function updateSidebarActive() {
+  sidebarNavigator.updateActiveState();
 }
 
-const finishBtn = document.getElementById('finishBtn');
-                    const supplierSelect = document.getElementById('supplierSelect');
-                    const itemsTbody = document.getElementById('itemsTbody');
-                    const originalSupplier = supplierSelect.value;
-                    const originalItemCount = itemsTbody.rows.length;
-
-                    function checkFinishState() {
-                        if (itemsTbody.rows.length === 0) {
-                            finishBtn.disabled = true;
-                            return;
-                        }
-                        if (supplierSelect.value !== originalSupplier) {
-                            finishBtn.disabled = false;
-                            return;
-                        }
-
-                        if (itemsTbody.rows.length !== originalItemCount) {
-                            finishBtn.disabled = false;
-                            return;
-                        }
-                        // tidak ada perubahan, disable
-                        finishBtn.disabled = true;
-                    }
-
-                    supplierSelect.addEventListener('change', checkFinishState);
-                    const observer = new MutationObserver(checkFinishState);
-                    observer.observe(itemsTbody, { childList: true, subtree: true });
-                    checkFinishState(); 

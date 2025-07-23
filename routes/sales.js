@@ -19,7 +19,8 @@ module.exports = function (db) {
         moment,
         title: 'Sales',
         messages: req.flash(),
-        formatCurrency
+        formatCurrency,
+        currentPage: 'sales'
       });
     } catch (error) {
       res.status(500).send('Error fetching sales');
@@ -39,7 +40,8 @@ module.exports = function (db) {
         customers,
         title: 'Add Sale',
         messages: req.flash(),
-        formatCurrency
+        formatCurrency,
+        currentPage: 'sales'
       });
     } catch (error) {
       res.status(500).send('Error preparing add sale');
@@ -112,7 +114,8 @@ module.exports = function (db) {
         customers,
         title: 'Edit Sale',
         messages: req.flash(),
-        formatCurrency
+        formatCurrency,
+        currentPage: 'sales'
       });
     } catch (error) {
       res.status(500).send('Error fetching sale');

@@ -21,7 +21,8 @@ module.exports = function (db) {
         moment,
         formatCurrency,
         title: 'Purchases',
-        messages: req.flash()
+        messages: req.flash(),
+        currentPage: 'purchases'
       });
     } catch (error) {
       console.log(error);
@@ -46,7 +47,8 @@ module.exports = function (db) {
         suppliers,
         formatCurrency,
         title: 'Add Purchase',
-        messages: req.flash()
+        messages: req.flash(),
+        currentPage: 'purchases'
       });
     } catch (error) {
       console.log(error);
@@ -153,7 +155,8 @@ module.exports = function (db) {
         suppliers,
         formatCurrency,
         title: 'Edit Purchase',
-        messages: req.flash()
+        messages: req.flash(),
+        currentPage: 'purchases'
       });
     } catch (error) {
       console.log(error);

@@ -25,7 +25,6 @@
             <div id="content-wrapper" class="d-flex flex-column">
                 <div id="content">
                     <%- include('../partials/topbar') %>
-                    <div id="main-content">
                         <div class="container-fluid">
                             <!-- Page Heading -->
                             <div class="d-sm-flex align-items-center justify-content-between mb-4">
@@ -40,7 +39,8 @@
                                 <!-- DataTales Example -->
                                 <div class="card shadow mb-4">
                                     <div class="card-header py-3">
-                                        <a href="/units/add" class="btn btn-primary btn-icon-split btn-sm shadow">
+                                        <a href="/units/add"
+                                            class="btn btn-primary btn-icon-split btn-sm shadow nav-link">
                                             <span class="icon text-white-50">
                                                 <i class="fas fa-plus"></i>
                                             </span>
@@ -69,8 +69,8 @@
                                                     </tr>
                                                 </tfoot>
                                                 <tbody>
-                                                    <% if (units && units.length > 0) { %>
-                                                        <% units.forEach(unit => { %>
+                                                    <% if (units && units.length> 0) { %>
+                                                        <% units.forEach(unit=> { %>
                                                             <tr>
                                                                 <td data-order="<%= unit.unit %>">
                                                                     <%= unit.unit %>
@@ -100,7 +100,8 @@
                                                             <% }) %>
                                                                 <% } else { %>
                                                                     <tr>
-                                                                        <td colspan="4" class="text-center">No units found</td>
+                                                                        <td colspan="4" class="text-center">No units
+                                                                            found</td>
                                                                     </tr>
                                                                     <% } %>
                                                 </tbody>
@@ -110,7 +111,6 @@
                                     </div>
                                 </div>
                         </div>
-                    </div>
                 </div>
                 <%- include('../partials/footer') %>
             </div>
