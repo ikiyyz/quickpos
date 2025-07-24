@@ -178,10 +178,12 @@ module.exports = function (db) {
       await Saleitem.destroy({ where: { invoice }, transaction: t });
       await Sale.destroy({ where: { invoice }, transaction: t });
       await t.commit();
-      res.redirect('/sales');
+      req.flash('success', 'Sale deleted successfully');
+      return res.redirect('/sales');
     } catch (error) {
       await t.rollback();
-      res.status(500).send('Gagal menghapus sale');
+      req.flash('error', 'Failed to delete sale');
+      return res.redirect('/sales');
     }
   });
 

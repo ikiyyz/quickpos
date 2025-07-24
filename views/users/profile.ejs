@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>
+        <%= title %> - POS System
+    </title>
+    <link href="/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,300,400,700,900" rel="stylesheet">
+    <link href="/stylesheets/sb-admin-2.min.css" rel="stylesheet">
+</head>
+
+<body id="page-top">
+    <div id="wrapper">
+        <%- include('../partials/sidebar') %>
+            <div id="content-wrapper" class="d-flex flex-column">
+                <div id="content">
+                    <%- include('../partials/topbar') %>
+                        <div id="main-content">
+                            <div class="container-fluid">
+                                <!-- Page Heading -->
+                                <div class="d-sm-flex align-items-center justify-content-between mb-4">
+                                    <h1 class="h3 mb-0 text-gray-800">Profile</h1>
+                                </div>
+
+                                <%- include('../partials/allert', { errorMessage: messages.error?.[0], successMessage:
+                                    messages.success?.[0] }) %>
+                                    
+                                    <div class="row justify-content-center">
+                                        <div class="col-12">
+                                            <div class="card shadow mb-4">
+                                                <div class="card-header py-3">
+                                                    <strong class="text-primary">Form Profile</strong>
+                                                </div>
+                                                <form id="profileForm" method="post" action="/users/profile">
+                                                    <div class="card-body">
+                                                        <div class="form-group row">
+                                                            <label for="email"
+                                                                class="col-sm-3 col-form-label">Email</label>
+                                                            <div class="col-sm-9">
+                                                                <input type="email" class="form-control" id="email"
+                                                                    name="email" value="<%= profile.email %>" readonly>
+                                                            </div>
+                                                        </div>
+                                                        <div class="form-group row">
+                                                            <label for="name"
+                                                                class="col-sm-3 col-form-label">Name</label>
+                                                            <div class="col-sm-9">
+                                                                <input type="text" class="form-control" id="name"
+                                                                    name="name" value="<%= profile.name %>" required>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="card-footer text-left">
+                                                        <button type="submit"
+                                                            class="btn btn-success btn-sm btn-icon-split" id="updateBtn"
+                                                            disabled>
+                                                            <span class="icon text-white-50"><i
+                                                                    class="fas fa-save"></i></span>
+                                                            <span class="text">Update</span>
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                            </div>
+                        </div>
+                </div>
+                <%- include('../partials/footer') %>
+            </div>
+    </div>
+    <%- include('../partials/scripts') %>
+
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const form = document.getElementById('profileForm');
+                const updateBtn = document.getElementById('updateBtn');
+                const nameInput = document.getElementById('name');
+                const originalName = nameInput.value;
+
+                function checkChanges() {
+                    updateBtn.disabled = (nameInput.value === originalName);
+                }
+
+                form.addEventListener('input', checkChanges);
+                checkChanges(); // Initial state
+            });
+        </script>
+</body>
+
+</html>

@@ -102,7 +102,8 @@ module.exports = function (db) {
         startDate,
         endDate,
         formatCurrency,
-        currentPage: 'dashboard'
+        currentPage: 'dashboard',
+        messages: req.flash()
       });
     } catch (err) {
       req.flash('error', 'Error accessing dashboard: ' + err.message);

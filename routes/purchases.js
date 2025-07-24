@@ -224,20 +224,18 @@ module.exports = function (db) {
     }
   });
 
-  // delete purchase
   router.post('/delete/:invoice', checkLogin, async (req, res) => {
     const { invoice } = req.params;
-
     try {
       // delete items first (due to foreign key constraints)
       await Purchaseitem.destroy({ where: { invoice } });
-
       await Purchase.destroy({ where: { invoice } });
-
-      res.redirect('/purchases');
+      req.flash('success', 'Purchase deleted successfully');
+      return res.redirect('/purchases');
     } catch (error) {
       console.log(error);
-      res.status(500).send('Gagal menghapus purchase');
+      req.flash('error', 'Failed to delete purchase');
+      return res.redirect('/purchases');
     }
   });
 
@@ -253,7 +251,7 @@ module.exports = function (db) {
       const invoice = itemToDelete.invoice;
       await Purchaseitem.destroy({ where: { id } });
 
-      // Hitung ulang totalsum setelah hapus item
+      // totalsum setelah hapus item
       const items = await Purchaseitem.findAll({ where: { invoice } });
       const totalsum = items.reduce((sum, item) => sum + Number(item.totalprice), 0);
       await Purchase.update({ totalsum }, { where: { invoice } });
