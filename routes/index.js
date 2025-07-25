@@ -58,7 +58,15 @@ module.exports = function (db) {
         role: user.role,
       };
 
-      return res.redirect('/dashboard');
+      // sesuai role
+      if (user.role === 'admin') {
+        return res.redirect('/dashboard');
+      } else if (user.role === 'operator') {
+        return res.redirect('/sales');
+      } else {
+
+        return res.redirect('/dashboard');
+      }
     } catch (err) {
       req.flash('error', 'Login error: ' + err.message);
       return res.redirect('/login');
