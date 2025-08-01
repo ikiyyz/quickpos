@@ -1,12 +1,16 @@
 var createError = require('http-errors');
 var express = require('express');
-const fileUpload = require('express-fileupload');
-const session = require("express-session");
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 const flash = require("connect-flash");
+const fileUpload = require('express-fileupload');
+const session = require("express-session");
 const { Pool } = require("pg");
+const { Goods } = require('./models');
+const { Op } = require('sequelize');
+const http = require('http');
+const socketIo = require('socket.io');
 
 const pool = new Pool({
   user: "riski",
@@ -25,7 +29,6 @@ var suppliersRouter = require('./routes/suppliers')(pool);
 var cunstomerRouter = require('./routes/customers')(pool);
 var purchasesRouter = require('./routes/purchases')(pool);
 var salesRouter = require('./routes/sales')(pool);
-
 
 var app = express();
 
@@ -85,4 +88,34 @@ app.use(function (err, req, res, next) {
   res.render('error');
 });
 
-module.exports = app;
+// Create HTTP server
+const server = http.createServer(app);
+const io = socketIo(server);
+io.on('connection', (socket) => {
+  console.log('A user connected');
+  
+  Goods.findAll({
+    where: { stock: { [Op.lte]: 5 } },
+    order: [['stock', 'ASC']],
+    limit: 3,
+    raw: true
+  }).then(lowStocks => {
+    const alerts = lowStocks.map(item => ({
+      barcode: item.barcode,
+      name: item.name,
+      stock: item.stock
+    }));
+    socket.emit('stock-alert', alerts);
+  }).catch(error => {
+    console.error('Error emitting initial stock alerts:', error);
+  });
+  
+  socket.on('disconnect', () => {
+    console.log('User disconnected');
+  });
+});
+
+// Make io available globally
+app.set('io', io);
+
+module.exports = { app, server };

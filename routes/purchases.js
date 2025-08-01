@@ -1,7 +1,8 @@
 const express = require('express');
-const { checkLogin, generateInvoice, formatCurrency } = require('../helpers/utils');
 const router = express.Router();
+const { checkLogin, generateInvoice, formatCurrency } = require('../helpers/utils');
 const { Purchase, Purchaseitem, Supplier, User, Goods } = require('../models');
+const { Op } = require('sequelize');
 const moment = require('moment');
 
 module.exports = function (db) {
@@ -55,21 +56,49 @@ module.exports = function (db) {
     }
   });
 
+  router.get('/goods/:barcode', checkLogin, async function (req, res) {
+    try {
+      const { barcode } = req.params;
+      const goods = await Goods.findOne({
+        where: { barcode: barcode },
+        include: [
+          {
+            model: require('../models').Unit,
+            as: 'unitData'
+          }
+        ]
+      });
+
+      if (!goods) {
+        return res.status(404).json({ error: 'Goods not found' });
+      }
+
+      res.json({
+        barcode: goods.barcode,
+        name: goods.name,
+        stock: goods.stock,
+        purchaseprice: goods.purchaseprice,
+        unit: goods.unit,
+        unitName: goods.unitData ? goods.unitData.name : ''
+      });
+    } catch (error) {
+      console.error('Error getting goods by barcode:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
   router.post('/add', checkLogin, async function (req, res) {
     try {
       const { supplier, items, invoice } = req.body;
 
-      // Validasi minimal 1 item
       if (!items || !Array.isArray(items) || items.length === 0) {
         return res.status(400).json({ error: 'Minimal 1 item.' });
       }
 
-      // Validasi supplier
       if (!supplier) {
         return res.status(400).json({ error: 'Silakan pilih supplier.' });
       }
 
-      // Validasi item
       const itemCodes = [];
       for (const item of items) {
         if (!item.itemcode || isNaN(item.quantity) || isNaN(item.purchaseprice)) {
@@ -109,6 +138,27 @@ module.exports = function (db) {
       });
 
       await Purchaseitem.bulkCreate(purchaseItems);
+
+      // Emit stock alerts after purchase
+      const io = req.app.get('io');
+      if (io) {
+        try {
+          const lowStocks = await Goods.findAll({
+            where: { stock: { [Op.lte]: 5 } },
+            order: [['stock', 'ASC']],
+            limit: 3,
+            raw: true
+          });
+          const alerts = lowStocks.map(item => ({
+            barcode: item.barcode,
+            name: item.name,
+            stock: item.stock
+          }));
+          io.emit('stock-alert', alerts);
+        } catch (error) {
+          console.error('Error emitting stock alerts:', error);
+        }
+      }
 
       res.status(201).json({ success: true, invoice });
     } catch (error) {
@@ -186,6 +236,27 @@ module.exports = function (db) {
       const totalsum = items.reduce((sum, item) => sum + Number(item.totalprice), 0);
       await Purchase.update({ totalsum }, { where: { invoice } });
 
+      // Emit stock alerts after adding item
+      const io = req.app.get('io');
+      if (io) {
+        try {
+          const lowStocks = await Goods.findAll({
+            where: { stock: { [Op.lte]: 5 } },
+            order: [['stock', 'ASC']],
+            limit: 3,
+            raw: true
+          });
+          const alerts = lowStocks.map(item => ({
+            barcode: item.barcode,
+            name: item.name,
+            stock: item.stock
+          }));
+          io.emit('stock-alert', alerts);
+        } catch (error) {
+          console.error('Error emitting stock alerts:', error);
+        }
+      }
+
       const item = await Purchaseitem.findOne({
         where: { id: purchaseItem.id },
         include: [{
@@ -227,7 +298,7 @@ module.exports = function (db) {
   router.post('/delete/:invoice', checkLogin, async (req, res) => {
     const { invoice } = req.params;
     try {
-      // delete items first (due to foreign key constraints)
+
       await Purchaseitem.destroy({ where: { invoice } });
       await Purchase.destroy({ where: { invoice } });
       req.flash('success', 'Purchase deleted successfully');

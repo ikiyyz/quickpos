@@ -4,8 +4,8 @@ const { checkLogin } = require('../helpers/utils');
 const createCsvStringifier = require('csv-writer').createObjectCsvStringifier;
 const { Sale, Purchase, sequelize } = require('../models');
 const { Op } = require('sequelize');
-const moment = require('moment');
 const { formatCurrency } = require('../helpers/utils');
+const moment = require('moment');
 
 module.exports = function (db) {
   router.get('/', checkLogin, async (req, res) => {
